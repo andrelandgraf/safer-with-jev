@@ -4,9 +4,11 @@ import { Pool } from "pg";
 import { attachDatabasePool } from "@neon/functions";
 import { TypeSafeClient } from "@typesafe-ai/sdk";
 import { handleSaferRequest } from "./lib/handler";
+import { homepageResponse } from "./lib/homepage";
 import { createLimiter } from "./lib/limiter";
 import { STAGE_MS } from "./lib/limits";
 import { CORS_EXPOSE } from "./lib/response";
+import { SITE_MARKDOWN } from "./lib/site-markdown";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -52,20 +54,7 @@ app.use(
   }),
 );
 
-app.get("/", (c) =>
-  c.json({
-    name: "safer-with-jev",
-    routes: {
-      inspect: ["POST /block-prompt-injections", "POST /block-unsafe-images", "POST /block-unsafe-replies"],
-      forward: [
-        "POST /block-prompt-injections?target=",
-        "PUT /block-unsafe-images?target=",
-        "PUT /block-unsafe-replies?target=",
-      ],
-    },
-    auth: "none",
-  }),
-);
+app.get("/", () => homepageResponse(SITE_MARKDOWN));
 
 app.all("*", (c) =>
   handleSaferRequest(c.req.raw, {

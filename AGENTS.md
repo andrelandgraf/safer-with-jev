@@ -6,6 +6,20 @@ Function slug `gateway`. Custom domain `safer-with-jev.com` via `functions.gatew
 
 `neon.ts` uploads `NEON_FUNCTION_GATEWAY_BASE_URL` as Function env. The Functions load path calls `parseEnv` and requires that key; the runtime does not inject it. `neon env pull` writes it locally.
 
+## Git
+
+This repo ships from `main`. Never open a PR. This overrides the PR default in `~/workspaces/AGENTS.md`.
+
+1. Work on `main`.
+2. `bun test` and `bun run typecheck`.
+3. Commit and `git push origin main`.
+4. `neon deploy --env .env.local` immediately after the push.
+5. Smoke `https://safer-with-jev.com` (`BASE_URL=https://safer-with-jev.com bun smoke`).
+
+A pushed-but-undeployed change is not done. Do not run neo eng-review / dx-review loops here.
+
+`main` has a repo ruleset (PR + 1 review). Admins bypass it (`current_user_can_bypass: always`). Direct pushes print a ruleset warning and still land.
+
 ## Setup
 
 ```bash
@@ -46,8 +60,9 @@ neon logs query --source function --since 1h
 
 ```text
 src/index.ts     Hono fetch handler
-src/lib/         routing, SSRF, Jev, vision, limiter, pinned HTTPS
+src/lib/         routing, SSRF, Jev, vision, limiter, pinned HTTPS, homepage
 scripts/smoke.ts live Function check
 neon.ts          AI Gateway + Function env + custom domain
+SITE.md          homepage copy (GET /)
 DESIGN.md        contract
 ```

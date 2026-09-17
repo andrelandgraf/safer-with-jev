@@ -1,6 +1,6 @@
 # Contributing
 
-Personal demo under `andrelandgraf/safer-with-jev`. Default branch is `main`.
+Personal demo under `andrelandgraf/safer-with-jev`. Ships from `main`: commit, push, `neon deploy --env .env.local`. Never open a PR.
 
 ## Prereqs
 
@@ -18,9 +18,10 @@ neon env pull
 # add TYPESAFE_API_KEY to .env.local if it is missing
 bun test
 bun run typecheck
-neon dev
+git commit
+git push origin main
 neon deploy --env .env.local
-BASE_URL=$(neon functions get gateway --output json | jq -r .invocation_url) bun smoke
+BASE_URL=https://safer-with-jev.com bun smoke
 ```
 
 Do not commit `.neon`, `.env.local`, or Function secrets.

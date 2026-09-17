@@ -19,6 +19,19 @@ async function readJson(response: Response): Promise<unknown> {
   }
 }
 
+const home = await fetch(`${baseUrl}/`);
+if (home.status !== 200) {
+  throw new Error(`expected 200 on /, got ${home.status}`);
+}
+const homeType = home.headers.get("content-type") ?? "";
+if (!homeType.includes("text/html")) {
+  throw new Error(`expected HTML on /, got ${homeType}`);
+}
+const homeHtml = await home.text();
+if (!homeHtml.includes("Safer with Jev") || !homeHtml.includes("block-prompt-injections")) {
+  throw new Error("homepage HTML is missing expected copy");
+}
+
 const missing = await fetch(`${baseUrl}/v1/chat/completions`, {
   method: "POST",
   headers: { "Content-Type": "application/json" },

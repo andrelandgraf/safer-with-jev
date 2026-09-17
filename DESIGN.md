@@ -11,6 +11,7 @@ Astra wrote the spec, reviewed it, then turned forwarding into a pass-then-forwa
 ## How a call works
 
 ```text
+GET  /                         HTML from SITE.md
 POST /block-prompt-injections
 POST /block-unsafe-images
 POST /block-unsafe-replies
@@ -381,7 +382,7 @@ No destination SDK retries. Logs: request id, stage, action, dispatch, status, t
 
 New personal GitHub repo, new personal Neon project in `aws-us-east-2`, org `org-summer-dust-66593634`. Leave `typesafe-on-neon` untouched.
 
-Stack: Bun, Node Function, Hono, `@typesafe-ai/sdk`, image decoder, DNS-pinnable HTTPS client. Vitest against real Jev plus at least two model hosts and two caller-owned upload hosts. `neon.ts` declares AI Gateway (captions), Function, and Lakebase Postgres for limiter counters. No object-storage bucket, no UI, no moderation queue. Copy `TYPESAFE_API_KEY` from the existing typesafe-on-neon env; do not mint a Safer API key. Leave that repo's files and deployment untouched.
+Stack: Bun, Node Function, Hono, `@typesafe-ai/sdk`, image decoder, DNS-pinnable HTTPS client. Vitest against real Jev plus at least two model hosts and two caller-owned upload hosts. `neon.ts` declares AI Gateway (captions), Function, and Lakebase Postgres for limiter counters. GET `/` renders `SITE.md`. No object-storage bucket, no moderation queue. Copy `TYPESAFE_API_KEY` from the existing typesafe-on-neon env; do not mint a Safer API key. Leave that repo's files and deployment untouched.
 
 Later: register `safer-with-jev.com`, set Function `customDomains`, apex CNAME flattening, verify TLS. Personal DNS, not Databricks Neon-zone Terraform.
 
