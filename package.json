@@ -1,0 +1,27 @@
+{
+  "name": "typesafe-on-neon",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Neon Function proxy for the Neon AI Gateway, with TypeSafe Jev routing jobs to Grok 4.6 or GPT-6 Astra.",
+  "scripts": {
+    "dev": "neon dev",
+    "deploy": "neon deploy --env .env.local",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "smoke": "bun scripts/smoke.ts"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "@neon/config": "^1.7.0",
+    "@typesafe-ai/sdk": "^0.6.0",
+    "hono": "^4.13.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.3",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.1"
+  }
+}
