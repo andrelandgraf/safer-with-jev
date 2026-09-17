@@ -97,27 +97,29 @@ function rejectUninspectableInput(value: unknown): void {
       "validation",
     );
   }
-  if (typeof value.type !== "string") {
-    return;
-  }
-  if (FORBIDDEN_PART_TYPES.has(value.type) || OPAQUE_INPUT_TYPES.has(value.type)) {
-    throw new HttpError(
-      400,
-      "unsupported_request",
-      `${value.type} parts are not inspectable.`,
-      "validation",
-    );
-  }
-  if (!INSPECTABLE_INPUT_TYPES.has(value.type)) {
-    throw new HttpError(
-      400,
-      "unsupported_request",
-      `${value.type} parts are not inspectable.`,
-      "validation",
-    );
+  if (typeof value.type === "string") {
+    if (FORBIDDEN_PART_TYPES.has(value.type) || OPAQUE_INPUT_TYPES.has(value.type)) {
+      throw new HttpError(
+        400,
+        "unsupported_request",
+        `${value.type} parts are not inspectable.`,
+        "validation",
+      );
+    }
+    if (!INSPECTABLE_INPUT_TYPES.has(value.type)) {
+      throw new HttpError(
+        400,
+        "unsupported_request",
+        `${value.type} parts are not inspectable.`,
+        "validation",
+      );
+    }
   }
   if (value.content !== undefined) {
     rejectUninspectableInput(value.content);
+  }
+  if (value.output !== undefined) {
+    rejectUninspectableInput(value.output);
   }
 }
 

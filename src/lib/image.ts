@@ -194,7 +194,7 @@ function webpInfo(bytes: Uint8Array): { width: number; height: number; animated:
       width = 1 + (bytes[dataStart + 4]! | (bytes[dataStart + 5]! << 8) | (bytes[dataStart + 6]! << 16));
       height = 1 + (bytes[dataStart + 7]! | (bytes[dataStart + 8]! << 8) | (bytes[dataStart + 9]! << 16));
     }
-    if (type === "VP8" && size >= 10) {
+    if (type === "VP8 " && size >= 10) {
       sawBitmap = true;
       if (width === 0 || height === 0) {
         width = (bytes[dataStart + 6]! | (bytes[dataStart + 7]! << 8)) & 0x3fff;

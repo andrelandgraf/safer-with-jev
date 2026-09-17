@@ -42,6 +42,24 @@ describe("parseModelRequest", () => {
     ).toThrow(/previous_response_id/);
   });
 
+  test("rejects image parts nested in a typeless Responses message", () => {
+    expect(() =>
+      parseModelRequest(
+        new TextEncoder().encode(
+          JSON.stringify({
+            model: "gpt-4.1",
+            input: [
+              {
+                role: "user",
+                content: [{ type: "input_image", image_url: "https://example.com/instructions.png" }],
+              },
+            ],
+          }),
+        ),
+      ),
+    ).toThrow(/input_image/);
+  });
+
   test("rejects image parts in Responses input", () => {
     expect(() =>
       parseModelRequest(
