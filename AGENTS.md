@@ -37,6 +37,7 @@ bun run typecheck
 neon dev
 neon deploy --env .env.local
 PROXY_BASE_URL=… PROXY_API_KEY=… bun smoke
+PROXY_BASE_URL=… PROXY_API_KEY=… bun bench
 neon functions get gateway
 neon logs query --source function --since 1h
 ```
@@ -47,5 +48,6 @@ neon logs query --source function --since 1h
 src/index.ts     Hono fetch handler
 src/lib/         job aliases, prompt extract, Jev classify, gateway proxy
 scripts/smoke.ts live Function check
+scripts/bench.ts Jev pick + latency against open mcp-server-neon PRs
 neon.ts          AI Gateway + Function env
 ```

@@ -9,7 +9,8 @@
     "deploy": "neon deploy --env .env.local",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "smoke": "bun scripts/smoke.ts"
+    "smoke": "bun scripts/smoke.ts",
+    "bench": "bun scripts/bench.ts"
   },
   "engines": {
     "node": ">=24"

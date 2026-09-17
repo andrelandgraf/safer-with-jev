@@ -125,6 +125,42 @@ if (autoModel !== "gpt-6-astra") {
   throw new Error(`auto expected x-neon-model gpt-6-astra, got ${autoModel}`);
 }
 
+function requireMsHeader(response: Response, name: string): number {
+  const raw = response.headers.get(name);
+  if (raw === null || !/^\d+$/.test(raw)) {
+    throw new Error(`${name} missing or not an integer ms value: ${raw}`);
+  }
+  return Number(raw);
+}
+
+const autoClassifyMs = requireMsHeader(autoResponse, "x-neon-classify-ms");
+const autoGatewayMs = requireMsHeader(autoResponse, "x-neon-gateway-ms");
+const autoTotalMs = requireMsHeader(autoResponse, "x-neon-total-ms");
+if (autoClassifyMs < 1) {
+  throw new Error(`auto expected x-neon-classify-ms >= 1, got ${autoClassifyMs}`);
+}
+if (autoGatewayMs < 1) {
+  throw new Error(`auto expected x-neon-gateway-ms >= 1, got ${autoGatewayMs}`);
+}
+if (Math.abs(autoTotalMs - (autoClassifyMs + autoGatewayMs)) > 1) {
+  throw new Error(
+    `auto x-neon-total-ms ${autoTotalMs} != classify ${autoClassifyMs} + gateway ${autoGatewayMs}`,
+  );
+}
+const autoServerTiming = autoResponse.headers.get("Server-Timing");
+if (
+  !autoServerTiming ||
+  !autoServerTiming.includes(`classify;dur=${autoClassifyMs}`) ||
+  !autoServerTiming.includes(`gateway;dur=${autoGatewayMs}`)
+) {
+  throw new Error(`auto Server-Timing mismatch: ${autoServerTiming}`);
+}
+
+const mainClassifyMs = requireMsHeader(mainResponse, "x-neon-classify-ms");
+if (mainClassifyMs > 20) {
+  throw new Error(`main alias should skip Jev, x-neon-classify-ms=${mainClassifyMs}`);
+}
+
 console.log(
   JSON.stringify(
     {
@@ -133,6 +169,9 @@ console.log(
       main: "grok-4-6",
       secReview: "gpt-6-astra",
       autoJob,
+      autoClassifyMs,
+      autoGatewayMs,
+      autoTotalMs,
     },
     null,
     2,

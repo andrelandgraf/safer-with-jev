@@ -23,6 +23,9 @@ neon deploy --env .env.local
 PROXY_BASE_URL=$(neon functions get gateway --output json | jq -r .invocation_url) \
   PROXY_API_KEY="$(awk -F= '/^PROXY_API_KEY=/{print $2}' .env.local)" \
   bun smoke
+PROXY_BASE_URL=$(neon functions get gateway --output json | jq -r .invocation_url) \
+  PROXY_API_KEY="$(awk -F= '/^PROXY_API_KEY=/{print $2}' .env.local)" \
+  bun bench
 ```
 
 Do not commit `.neon`, `.env.local`, or Function secrets.
