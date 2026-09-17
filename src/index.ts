@@ -7,6 +7,7 @@ import { isRecord, readJsonObject } from "./lib/json";
 import { promptFromChatBody, promptFromResponsesBody } from "./lib/prompt";
 import { resolveCatalogModel } from "./lib/resolve";
 import { proxyGateway } from "./lib/gateway";
+import { applyTimingHeaders } from "./lib/timing";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -31,7 +32,14 @@ app.use(
     origin: "*",
     allowHeaders: ["Authorization", "Content-Type", "x-api-key"],
     allowMethods: ["GET", "POST", "OPTIONS"],
-    exposeHeaders: ["x-neon-job", "x-neon-model"],
+    exposeHeaders: [
+      "x-neon-job",
+      "x-neon-model",
+      "x-neon-classify-ms",
+      "x-neon-gateway-ms",
+      "x-neon-total-ms",
+      "Server-Timing",
+    ],
   }),
 );
 
@@ -60,6 +68,8 @@ app.get("/", (c) =>
       auto: "TypeSafe Jev picks a job, then the matching catalog model",
     },
     auth: "Authorization: Bearer $PROXY_API_KEY",
+    timing:
+      "x-neon-classify-ms, x-neon-gateway-ms, x-neon-total-ms, and Server-Timing (classify, gateway, total)",
   }),
 );
 
@@ -110,6 +120,7 @@ async function proxyWithResolvedModel(
     return c.json({ error: message }, 400);
   }
 
+  const started = performance.now();
   const prompt = promptFrom(body);
   let resolved: { job: string | null; catalogId: string };
   try {
@@ -125,6 +136,7 @@ async function proxyWithResolvedModel(
     }
     throw error;
   }
+  const afterClassify = performance.now();
 
   const upstream = await proxyGateway({
     baseUrl: gatewayBaseUrl,
@@ -133,12 +145,18 @@ async function proxyWithResolvedModel(
     method: "POST",
     body: JSON.stringify({ ...body, model: resolved.catalogId }),
   });
+  const afterGateway = performance.now();
 
   const headers = new Headers(upstream.headers);
   headers.set("x-neon-model", resolved.catalogId);
   if (resolved.job) {
     headers.set("x-neon-job", resolved.job);
   }
+  applyTimingHeaders(headers, {
+    classifyMs: afterClassify - started,
+    gatewayMs: afterGateway - afterClassify,
+    totalMs: afterGateway - started,
+  });
 
   return new Response(upstream.body, {
     status: upstream.status,

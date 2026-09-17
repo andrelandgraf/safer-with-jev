@@ -66,6 +66,17 @@ const completion = await client.chat.completions.create({
 
 `x-neon-model` is the catalog id the gateway received. `x-neon-job` is set when the request used an alias or Jev.
 
+Every completion also returns millisecond timings:
+
+```
+x-neon-classify-ms: 42
+x-neon-gateway-ms: 810
+x-neon-total-ms: 854
+Server-Timing: classify;dur=42, gateway;dur=810, total;dur=854
+```
+
+`classify` is Jev when `model` is `auto` or omitted, otherwise the alias lookup. `gateway` is the AI Gateway hop. `total` is both. Alias lookups are ~0 ms.
+
 | `model` | Job | Catalog id |
 |---|---|---|
 | `main` | main | `grok-4-6` |
@@ -87,6 +98,7 @@ neon link --org-id org-summer-dust-66593634 --project-name typesafe-on-neon --re
 neon deploy --env .env.local
 bun test
 PROXY_BASE_URL=$(neon functions get gateway --output json | jq -r .invocation_url) bun smoke
+PROXY_BASE_URL=$(neon functions get gateway --output json | jq -r .invocation_url) bun bench
 ```
 
 Local:
