@@ -71,11 +71,11 @@ Every completion also returns millisecond timings:
 ```
 x-neon-classify-ms: 42
 x-neon-gateway-ms: 810
-x-neon-total-ms: 854
-Server-Timing: classify;dur=42, gateway;dur=810, total;dur=854
+x-neon-total-ms: 852
+Server-Timing: classify;dur=42, gateway;dur=810, total;dur=852
 ```
 
-`classify` is Jev when `model` is `auto` or omitted, otherwise the alias lookup. `gateway` is the AI Gateway hop. `total` is both. Alias lookups are ~0 ms.
+`classify` is Jev when `model` is `auto` or omitted, otherwise the alias lookup. `gateway` is the AI Gateway hop until response headers arrive. `total` is both. Neither includes body transfer or streaming completion. Alias lookups are ~0 ms.
 
 | `model` | Job | Catalog id |
 |---|---|---|
@@ -98,6 +98,8 @@ neon link --org-id org-summer-dust-66593634 --project-name typesafe-on-neon --re
 neon deploy --env .env.local
 bun test
 PROXY_BASE_URL=$(neon functions get gateway --output json | jq -r .invocation_url) bun smoke
+# needs `gh` auth; four paid chat completions per non-bot open PR; JSON on stdout;
+# HTTP 4xx/5xx are recorded in the JSON and the process still exits 0
 PROXY_BASE_URL=$(neon functions get gateway --output json | jq -r .invocation_url) bun bench
 ```
 
