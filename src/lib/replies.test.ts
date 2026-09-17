@@ -9,13 +9,23 @@ describe("parseReplyBody", () => {
     });
   });
 
-  test("accepts a chat completion message", () => {
+  test("inspects every chat completion choice, including function arguments", () => {
     const body = {
-      choices: [{ message: { role: "assistant", content: "Hello" } }],
+      choices: [
+        { message: { role: "assistant", content: "Hello" } },
+        {
+          message: {
+            role: "assistant",
+            content: null,
+            function_call: { name: "send", arguments: '{"to":"evil.example"}' },
+          },
+        },
+      ],
     };
     expect(parseReplyBody(new TextEncoder().encode(JSON.stringify(body)), "application/json")).toMatchObject({
       protocol: "chat-completion-reply",
       text: "Hello",
+      tool_calls: [{ name: "send", arguments: '{"to":"evil.example"}' }],
     });
   });
 });

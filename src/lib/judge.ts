@@ -107,6 +107,17 @@ function asState(state: unknown): EntryType {
   return serialized;
 }
 
+function rethrowJev(error: unknown, signal: AbortSignal): never {
+  if (error instanceof HttpError) {
+    throw error;
+  }
+  const name = error instanceof Error ? error.name : "";
+  if (name === "APITimeoutError" || name === "APIUserAbortError" || signal.aborted) {
+    throw new HttpError(504, "deadline", "Jev timed out.", "jev");
+  }
+  throw new HttpError(502, "jev_failed", "Jev inference failed.", "jev");
+}
+
 async function askPrompt(client: TypeSafeClient, state: unknown, signal: AbortSignal) {
   try {
     return await client.systemOne(
@@ -114,14 +125,7 @@ async function askPrompt(client: TypeSafeClient, state: unknown, signal: AbortSi
       { timeout: STAGE_MS, signal, retry: { maxRetries: 0 } },
     );
   } catch (error) {
-    if (error instanceof HttpError) {
-      throw error;
-    }
-    const name = error instanceof Error ? error.name : "";
-    if (name === "APITimeoutError" || name === "APIUserAbortError" || signal.aborted) {
-      throw new HttpError(504, "deadline", "Jev timed out.", "jev");
-    }
-    throw new HttpError(502, "jev_failed", "Jev inference failed.", "jev");
+    rethrowJev(error, signal);
   }
 }
 
@@ -132,14 +136,7 @@ async function askImage(client: TypeSafeClient, state: unknown, signal: AbortSig
       { timeout: STAGE_MS, signal, retry: { maxRetries: 0 } },
     );
   } catch (error) {
-    if (error instanceof HttpError) {
-      throw error;
-    }
-    const name = error instanceof Error ? error.name : "";
-    if (name === "APITimeoutError" || name === "APIUserAbortError" || signal.aborted) {
-      throw new HttpError(504, "deadline", "Jev timed out.", "jev");
-    }
-    throw new HttpError(502, "jev_failed", "Jev inference failed.", "jev");
+    rethrowJev(error, signal);
   }
 }
 
@@ -150,14 +147,7 @@ async function askReply(client: TypeSafeClient, state: unknown, signal: AbortSig
       { timeout: STAGE_MS, signal, retry: { maxRetries: 0 } },
     );
   } catch (error) {
-    if (error instanceof HttpError) {
-      throw error;
-    }
-    const name = error instanceof Error ? error.name : "";
-    if (name === "APITimeoutError" || name === "APIUserAbortError" || signal.aborted) {
-      throw new HttpError(504, "deadline", "Jev timed out.", "jev");
-    }
-    throw new HttpError(502, "jev_failed", "Jev inference failed.", "jev");
+    rethrowJev(error, signal);
   }
 }
 

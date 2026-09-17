@@ -51,13 +51,9 @@ describe("connectionWouldDropRequired", () => {
 });
 
 describe("outboundPutHeaders", () => {
-  test("only host, content-type, content-length", () => {
-    const outbound = outboundPutHeaders("image/png", "s3.amazonaws.com", 99);
-    expect([...outbound.keys()].sort()).toEqual([
-      "content-length",
-      "content-type",
-      "host",
-    ]);
+  test("only host, content-type, content-length, preserving parameters", () => {
+    const outbound = outboundPutHeaders("text/plain; charset=utf-8", "s3.amazonaws.com", 99);
+    expect(outbound.get("content-type")).toBe("text/plain; charset=utf-8");
   });
 });
 

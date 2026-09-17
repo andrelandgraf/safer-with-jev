@@ -23,12 +23,6 @@ export type Routing =
       target: ValidatedTarget;
     };
 
-const ROUTES = new Set<string>([
-  "/block-prompt-injections",
-  "/block-unsafe-images",
-  "/block-unsafe-replies",
-]);
-
 function routeName(path: string): RouteName | null {
   if (path === "/block-prompt-injections") {
     return "block-prompt-injections";
@@ -69,9 +63,6 @@ export function parseRouting(request: Request): Routing {
 
   const route = routeName(path);
   if (!route) {
-    if (ROUTES.has(path)) {
-      throw new HttpError(405, "method_not_allowed", "Unsupported method.", "validation");
-    }
     throw new HttpError(404, "not_found", "Not found.", "validation");
   }
 

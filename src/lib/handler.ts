@@ -91,17 +91,19 @@ export async function handleSaferRequest(request: Request, deps: SaferDeps): Pro
       assertPutSignedHeaders(routing.target.search);
     }
     if (routing.kind !== "inspect") {
-      await resolvePublicAddresses(routing.target.hostname, "validation");
+      await resolvePublicAddresses(routing.target.hostname, "validation", total);
     }
 
     await deps.limiter.admit({
       ip: clientIp(request.headers),
       image: routing.route === "block-unsafe-images",
+      signal: total,
     });
 
     const maxBytes = routing.route === "block-unsafe-images" ? IMAGE_MAX_BYTES : TEXT_MAX_BYTES;
     const body = await readBoundedBody(request, maxBytes, total);
     const type = mediaType(request.headers);
+    const rawContentType = request.headers.get("content-type")?.trim() || type;
 
     let state: unknown;
     let protocol: "chat-completions" | "responses" | "put" | undefined = destinationName(routing);
@@ -143,13 +145,17 @@ export async function handleSaferRequest(request: Request, deps: SaferDeps): Pro
           ? "reply"
           : "prompt";
     const jevStarted = Date.now();
-    const judgment = await judge({
-      client: deps.typesafe,
-      state,
-      kind: judgeKind,
-      signal: total,
-    });
-    jevMs = Date.now() - jevStarted;
+    let judgment;
+    try {
+      judgment = await judge({
+        client: deps.typesafe,
+        state,
+        kind: judgeKind,
+        signal: total,
+      });
+    } finally {
+      jevMs = Date.now() - jevStarted;
+    }
 
     const destName = routing.kind === "put" ? "put" : protocol;
     if (routing.kind !== "inspect") {
@@ -187,7 +193,11 @@ export async function handleSaferRequest(request: Request, deps: SaferDeps): Pro
     dispatched = true;
     const outboundHeaders =
       routing.kind === "put"
-        ? outboundPutHeaders(type || "application/octet-stream", routing.target.hostHeader, body.byteLength)
+        ? outboundPutHeaders(
+            rawContentType || "application/octet-stream",
+            routing.target.hostHeader,
+            body.byteLength,
+          )
         : outboundModelHeaders(request.headers, routing.target.hostHeader, body.byteLength);
     const upstream = await pinnedFetch({
       target: routing.target,

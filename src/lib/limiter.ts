@@ -15,7 +15,7 @@ type Reservation = {
 };
 
 export type Limiter = {
-  admit: (input: { ip: string; image: boolean }) => Promise<void>;
+  admit: (input: { ip: string; image: boolean; signal: AbortSignal }) => Promise<void>;
 };
 
 function pacificParts(date: Date): { day: string; minute: string; second: number } {
@@ -107,6 +107,9 @@ export function createLimiter(pool: Pool | null): Limiter {
       if (!pool) {
         throw new HttpError(503, "limiter_unavailable", "Rate limiter storage is unavailable.", "admission");
       }
+      if (input.signal.aborted) {
+        throw new HttpError(504, "deadline", "Request deadline exceeded during admission.", "admission");
+      }
 
       const now = new Date();
       const parts = pacificParts(now);
@@ -145,8 +148,15 @@ export function createLimiter(pool: Pool | null): Limiter {
 
       const client = await pool.connect();
       try {
+        if (input.signal.aborted) {
+          throw new HttpError(504, "deadline", "Request deadline exceeded during admission.", "admission");
+        }
         await client.query("BEGIN");
         for (const reservation of reservations) {
+          if (input.signal.aborted) {
+            await client.query("ROLLBACK");
+            throw new HttpError(504, "deadline", "Request deadline exceeded during admission.", "admission");
+          }
           const count = await increment(client, reservation.bucket);
           if (count > reservation.limit) {
             await client.query("ROLLBACK");

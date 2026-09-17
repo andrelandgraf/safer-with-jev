@@ -10,16 +10,18 @@ export type ValidatedTarget = {
 };
 
 function requestPathFromHref(href: string): string {
-  const withoutProtocol = href.replace(/^https:\/\//i, "");
-  const slash = withoutProtocol.indexOf("/");
-  const query = withoutProtocol.indexOf("?");
-  if (slash === -1) {
-    if (query === -1) {
-      return "/";
-    }
-    return `/${withoutProtocol.slice(query)}`;
+  const origin = /^https:\/\/[^/?#]*/i.exec(href);
+  if (!origin) {
+    throw new HttpError(400, "invalid_destination", "target is not a valid URL.", "validation");
   }
-  return withoutProtocol.slice(slash);
+  const rest = href.slice(origin[0].length);
+  if (rest.startsWith("/")) {
+    return rest;
+  }
+  if (rest.startsWith("?")) {
+    return `/${rest}`;
+  }
+  return "/";
 }
 
 function ipv4ToInt(address: string): number {
@@ -76,6 +78,14 @@ function isBlockedIpv6(address: string): boolean {
     }
   }
   const full = expandIpv6(lower);
+  if (full.startsWith("0000:0000:0000:0000:0000:ffff:")) {
+    const hi = Number.parseInt(full.slice(30, 34), 16);
+    const lo = Number.parseInt(full.slice(35, 39), 16);
+    const mapped = `${hi >> 8}.${hi & 0xff}.${lo >> 8}.${lo & 0xff}`;
+    if (isIP(mapped) === 4) {
+      return isBlockedIpv4(mapped);
+    }
+  }
   const first = Number.parseInt(full.slice(0, 4), 16);
   if ((first & 0xfe00) === 0xfc00) {
     return true;

@@ -11,6 +11,8 @@ describe("isBlockedAddress", () => {
     expect(isBlockedAddress("100.64.0.1")).toBe(true);
     expect(isBlockedAddress("::1")).toBe(true);
     expect(isBlockedAddress("::ffff:127.0.0.1")).toBe(true);
+    expect(isBlockedAddress("::ffff:7f00:1")).toBe(true);
+    expect(isBlockedAddress("0:0:0:0:0:ffff:a00:1")).toBe(true);
   });
 
   test("allows public unicast", () => {
@@ -51,5 +53,10 @@ describe("requestPath", () => {
       "https://s3.amazonaws.com/bucket/key%2Fpath?X-Amz-Signature=a%2Fb",
     );
     expect(target.requestPath).toBe("/bucket/key%2Fpath?X-Amz-Signature=a%2Fb");
+  });
+
+  test("keeps a query-only target when the query contains slashes", () => {
+    const target = validateTargetUrl("https://example.com?url=https://other.example/path");
+    expect(target.requestPath).toBe("/?url=https://other.example/path");
   });
 });

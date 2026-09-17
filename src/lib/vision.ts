@@ -104,7 +104,10 @@ export async function captionImage(input: {
   }
 
   if (!response.ok) {
-    throw new HttpError(422, "unsupported_content", "Vision model refused the image.", "vision");
+    if (response.status === 400 || response.status === 422) {
+      throw new HttpError(422, "unsupported_content", "Vision model refused the image.", "vision");
+    }
+    throw new HttpError(502, "vision_failed", "Vision caption request failed.", "vision");
   }
 
   let payload: unknown;

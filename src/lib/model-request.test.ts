@@ -54,6 +54,19 @@ describe("parseModelRequest", () => {
       ),
     ).toThrow(/input_image/);
   });
+
+  test("rejects opaque input item_reference", () => {
+    expect(() =>
+      parseModelRequest(
+        new TextEncoder().encode(
+          JSON.stringify({
+            model: "gpt-4.1",
+            input: [{ type: "item_reference", id: "msg_123" }],
+          }),
+        ),
+      ),
+    ).toThrow(/item_reference/);
+  });
 });
 
 describe("parseInspectPrompt", () => {

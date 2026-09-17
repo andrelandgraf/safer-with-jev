@@ -16,6 +16,7 @@ export type PinnedResponse = {
 export async function resolvePublicAddresses(
   hostname: string,
   stage: ErrorStage,
+  signal?: AbortSignal,
 ): Promise<string[]> {
   if (isIP(hostname)) {
     if (isBlockedAddress(hostname)) {
@@ -26,8 +27,33 @@ export async function resolvePublicAddresses(
 
   let results: { address: string }[];
   try {
-    results = await lookup(hostname, { all: true, verbatim: true });
-  } catch {
+    const lookupPromise = lookup(hostname, { all: true, verbatim: true });
+    if (!signal) {
+      results = await lookupPromise;
+    } else if (signal.aborted) {
+      throw new HttpError(504, "deadline", "Request deadline exceeded during DNS.", stage);
+    } else {
+      results = await new Promise((resolve, reject) => {
+        const onAbort = () => {
+          reject(new HttpError(504, "deadline", "Request deadline exceeded during DNS.", stage));
+        };
+        signal.addEventListener("abort", onAbort, { once: true });
+        lookupPromise.then(
+          (value) => {
+            signal.removeEventListener("abort", onAbort);
+            resolve(value);
+          },
+          (error) => {
+            signal.removeEventListener("abort", onAbort);
+            reject(error);
+          },
+        );
+      });
+    }
+  } catch (error) {
+    if (error instanceof HttpError) {
+      throw error;
+    }
     throw new HttpError(
       stage === "destination" ? 502 : 400,
       "invalid_destination",
@@ -55,7 +81,7 @@ export async function pinnedFetch(input: {
   body: Uint8Array;
   signal: AbortSignal;
 }): Promise<PinnedResponse> {
-  const addresses = await resolvePublicAddresses(input.target.hostname, "destination");
+  const addresses = await resolvePublicAddresses(input.target.hostname, "destination", input.signal);
   const ip = addresses[0];
   if (!ip) {
     throw new HttpError(502, "invalid_destination", "target hostname did not resolve.", "destination");

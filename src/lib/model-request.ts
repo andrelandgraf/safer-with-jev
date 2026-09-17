@@ -58,17 +58,57 @@ const FORBIDDEN_PART_TYPES = new Set([
   "input_video",
 ]);
 
-function rejectMediaParts(value: unknown): void {
+const OPAQUE_INPUT_TYPES = new Set([
+  "item_reference",
+  "item",
+  "reasoning",
+  "computer_call",
+  "computer_call_output",
+  "mcp_call",
+  "mcp_list_tools",
+  "mcp_approval_request",
+  "mcp_approval_response",
+]);
+
+const INSPECTABLE_INPUT_TYPES = new Set([
+  "message",
+  "input_text",
+  "output_text",
+  "text",
+  "function_call",
+  "function_call_output",
+]);
+
+function rejectUninspectableInput(value: unknown): void {
+  if (typeof value === "string") {
+    return;
+  }
   if (Array.isArray(value)) {
     for (const item of value) {
-      rejectMediaParts(item);
+      rejectUninspectableInput(item);
     }
     return;
   }
   if (!isRecord(value)) {
+    throw new HttpError(
+      400,
+      "unsupported_request",
+      "Responses input items must be text or inspectable objects.",
+      "validation",
+    );
+  }
+  if (typeof value.type !== "string") {
     return;
   }
-  if (typeof value.type === "string" && FORBIDDEN_PART_TYPES.has(value.type)) {
+  if (FORBIDDEN_PART_TYPES.has(value.type) || OPAQUE_INPUT_TYPES.has(value.type)) {
+    throw new HttpError(
+      400,
+      "unsupported_request",
+      `${value.type} parts are not inspectable.`,
+      "validation",
+    );
+  }
+  if (!INSPECTABLE_INPUT_TYPES.has(value.type)) {
     throw new HttpError(
       400,
       "unsupported_request",
@@ -77,7 +117,7 @@ function rejectMediaParts(value: unknown): void {
     );
   }
   if (value.content !== undefined) {
-    rejectMediaParts(value.content);
+    rejectUninspectableInput(value.content);
   }
 }
 
@@ -180,7 +220,7 @@ export function parseModelRequest(bytes: Uint8Array): {
   }
 
   if (Array.isArray(parsed.input)) {
-    rejectMediaParts(parsed.input);
+    rejectUninspectableInput(parsed.input);
     return {
       protocol: "responses",
       state: {
