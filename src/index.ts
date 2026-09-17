@@ -1,12 +1,12 @@
-import { Hono, type Context } from "hono";
+import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { Pool } from "pg";
+import { attachDatabasePool } from "@neon/functions";
 import { TypeSafeClient } from "@typesafe-ai/sdk";
-import { bearerToken, tokensMatch } from "./lib/auth";
-import { aliasModels } from "./lib/jobs";
-import { isRecord, readJsonObject } from "./lib/json";
-import { promptFromChatBody, promptFromResponsesBody } from "./lib/prompt";
-import { resolveCatalogModel } from "./lib/resolve";
-import { proxyGateway } from "./lib/gateway";
+import { handleSaferRequest } from "./lib/handler";
+import { createLimiter } from "./lib/limiter";
+import { STAGE_MS } from "./lib/limits";
+import { CORS_EXPOSE } from "./lib/response";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -16,12 +16,23 @@ function requireEnv(name: string): string {
   return value;
 }
 
-const gatewayBaseUrl = requireEnv("NEON_AI_GATEWAY_BASE_URL");
-const gatewayToken = requireEnv("NEON_AI_GATEWAY_TOKEN");
-const proxyApiKey = requireEnv("PROXY_API_KEY");
 const typesafe = new TypeSafeClient({
   apiKey: requireEnv("TYPESAFE_API_KEY"),
+  timeout: STAGE_MS,
+  retry: { maxRetries: 0 },
+  logLevel: "error",
 });
+
+const gatewayBaseUrl = requireEnv("NEON_AI_GATEWAY_BASE_URL");
+const gatewayToken = requireEnv("NEON_AI_GATEWAY_TOKEN");
+
+const databaseUrl = process.env.DATABASE_URL;
+const pool = databaseUrl ? new Pool({ connectionString: databaseUrl, max: 5 }) : null;
+if (pool) {
+  attachDatabasePool(pool);
+}
+
+const limiter = createLimiter(pool);
 
 const app = new Hono();
 
@@ -29,130 +40,40 @@ app.use(
   "*",
   cors({
     origin: "*",
-    allowHeaders: ["Authorization", "Content-Type", "x-api-key"],
-    allowMethods: ["GET", "POST", "OPTIONS"],
-    exposeHeaders: ["x-neon-job", "x-neon-model"],
+    allowMethods: ["GET", "POST", "PUT", "OPTIONS"],
+    allowHeaders: [
+      "Authorization",
+      "Content-Type",
+      "OpenAI-Organization",
+      "OpenAI-Project",
+      "Idempotency-Key",
+    ],
+    exposeHeaders: [...CORS_EXPOSE],
   }),
 );
-
-app.use("*", async (c, next) => {
-  if (c.req.method === "OPTIONS" || c.req.path === "/") {
-    await next();
-    return;
-  }
-
-  const token = bearerToken(c.req.raw);
-  if (!token || !tokensMatch(token, proxyApiKey)) {
-    return c.json({ error: "Unauthorized" }, 401);
-  }
-  await next();
-});
 
 app.get("/", (c) =>
   c.json({
-    name: "typesafe-on-neon",
-    docs: "POST /v1/chat/completions and POST /v1/responses proxy the Neon AI Gateway.",
-    models: {
-      main: "grok-4-6",
-      plan_review: "gpt-6-astra",
-      sec_review: "gpt-6-astra",
-      eng_review: "gpt-6-astra",
-      auto: "TypeSafe Jev picks a job, then the matching catalog model",
+    name: "safer-with-jev",
+    routes: {
+      inspect: ["POST /block-prompt-injections", "POST /block-unsafe-images", "POST /block-unsafe-replies"],
+      forward: [
+        "POST /block-prompt-injections?target=",
+        "PUT /block-unsafe-images?target=",
+        "PUT /block-unsafe-replies?target=",
+      ],
     },
-    auth: "Authorization: Bearer $PROXY_API_KEY",
+    auth: "none",
   }),
 );
 
-app.get("/v1/models", async (c) => {
-  const upstream = await proxyGateway({
-    baseUrl: gatewayBaseUrl,
-    token: gatewayToken,
-    path: "/v1/models",
-    method: "GET",
-  });
-  if (!upstream.ok) {
-    return new Response(upstream.body, {
-      status: upstream.status,
-      statusText: upstream.statusText,
-      headers: upstream.headers,
-    });
-  }
-
-  const payload: unknown = await upstream.json();
-  if (!isRecord(payload) || !Array.isArray(payload.data)) {
-    throw new Error("AI Gateway /v1/models returned an unexpected body");
-  }
-
-  const aliases = aliasModels().map((alias) => ({
-    id: alias.id,
-    object: "model",
-    owned_by: "typesafe-on-neon",
-    job: alias.job,
-    catalog_id: alias.catalogId,
-  }));
-
-  return c.json({
-    object: "list",
-    data: [...aliases, ...payload.data],
-  });
-});
-
-async function proxyWithResolvedModel(
-  c: Context,
-  promptFrom: (body: Record<string, unknown>) => string,
-  path: string,
-): Promise<Response> {
-  let body: Record<string, unknown>;
-  try {
-    body = await readJsonObject(c.req.raw);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Invalid JSON";
-    return c.json({ error: message }, 400);
-  }
-
-  const prompt = promptFrom(body);
-  let resolved: { job: string | null; catalogId: string };
-  try {
-    resolved = await resolveCatalogModel({
-      modelField: body.model,
-      prompt,
-      client: typesafe,
-    });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Classification failed";
-    if (message.startsWith("Cannot classify")) {
-      return c.json({ error: message }, 400);
-    }
-    throw error;
-  }
-
-  const upstream = await proxyGateway({
-    baseUrl: gatewayBaseUrl,
-    token: gatewayToken,
-    path,
-    method: "POST",
-    body: JSON.stringify({ ...body, model: resolved.catalogId }),
-  });
-
-  const headers = new Headers(upstream.headers);
-  headers.set("x-neon-model", resolved.catalogId);
-  if (resolved.job) {
-    headers.set("x-neon-job", resolved.job);
-  }
-
-  return new Response(upstream.body, {
-    status: upstream.status,
-    statusText: upstream.statusText,
-    headers,
-  });
-}
-
-app.post("/v1/chat/completions", (c) =>
-  proxyWithResolvedModel(c, promptFromChatBody, "/v1/chat/completions"),
-);
-
-app.post("/v1/responses", (c) =>
-  proxyWithResolvedModel(c, promptFromResponsesBody, "/openai/v1/responses"),
+app.all("*", (c) =>
+  handleSaferRequest(c.req.raw, {
+    typesafe,
+    limiter,
+    gatewayBaseUrl,
+    gatewayToken,
+  }),
 );
 
 export default app;

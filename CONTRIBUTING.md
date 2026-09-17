@@ -1,6 +1,6 @@
 # Contributing
 
-Personal demo under `andrelandgraf/typesafe-on-neon`. Default branch is `main`.
+Personal demo under `andrelandgraf/safer-with-jev`. Default branch is `main`.
 
 ## Prereqs
 
@@ -15,14 +15,12 @@ Personal demo under `andrelandgraf/typesafe-on-neon`. Default branch is `main`.
 bun install
 neon link -y
 neon env pull
-# add TYPESAFE_API_KEY and PROXY_API_KEY to .env.local if they are missing
+# add TYPESAFE_API_KEY to .env.local if it is missing
 bun test
 bun run typecheck
 neon dev
 neon deploy --env .env.local
-PROXY_BASE_URL=$(neon functions get gateway --output json | jq -r .invocation_url) \
-  PROXY_API_KEY="$(awk -F= '/^PROXY_API_KEY=/{print $2}' .env.local)" \
-  bun smoke
+BASE_URL=$(neon functions get gateway --output json | jq -r .invocation_url) bun smoke
 ```
 
 Do not commit `.neon`, `.env.local`, or Function secrets.

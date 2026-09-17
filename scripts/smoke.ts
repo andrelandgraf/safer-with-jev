@@ -1,20 +1,13 @@
-const baseUrl = process.env.PROXY_BASE_URL;
-const apiKey = process.env.PROXY_API_KEY;
+const baseUrl = process.env.BASE_URL;
 
 export {};
 
 if (!baseUrl) {
-  throw new Error("PROXY_BASE_URL is not set");
-}
-if (!apiKey) {
-  throw new Error("PROXY_API_KEY is not set");
+  throw new Error("BASE_URL is not set");
 }
 
-function authHeaders(): HeadersInit {
-  return {
-    Authorization: `Bearer ${apiKey}`,
-    "Content-Type": "application/json",
-  };
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 async function readJson(response: Response): Promise<unknown> {
@@ -26,113 +19,52 @@ async function readJson(response: Response): Promise<unknown> {
   }
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-const unauth = await fetch(`${baseUrl}/v1/models`);
-if (unauth.status !== 401) {
-  throw new Error(`expected 401 without a key, got ${unauth.status}`);
-}
-
-const modelsResponse = await fetch(`${baseUrl}/v1/models`, {
-  headers: authHeaders(),
-});
-if (!modelsResponse.ok) {
-  throw new Error(`/v1/models failed: ${modelsResponse.status} ${await modelsResponse.text()}`);
-}
-const models = await readJson(modelsResponse);
-if (!isRecord(models) || !Array.isArray(models.data)) {
-  throw new Error("/v1/models returned an unexpected body");
-}
-const ids = models.data
-  .map((row) => (isRecord(row) && typeof row.id === "string" ? row.id : null))
-  .filter((id): id is string => id !== null);
-for (const id of ["auto", "main", "grok-4-6", "gpt-6-astra"]) {
-  if (!ids.includes(id)) {
-    throw new Error(`/v1/models missing ${id}`);
-  }
-}
-
-const mainResponse = await fetch(`${baseUrl}/v1/chat/completions`, {
+const missing = await fetch(`${baseUrl}/v1/chat/completions`, {
   method: "POST",
-  headers: authHeaders(),
-  body: JSON.stringify({
-    model: "main",
-    messages: [{ role: "user", content: "Reply with exactly: grok-ok" }],
-  }),
+  headers: { "Content-Type": "application/json" },
+  body: "{}",
 });
-if (!mainResponse.ok) {
-  throw new Error(`main completion failed: ${mainResponse.status} ${await mainResponse.text()}`);
-}
-if (mainResponse.headers.get("x-neon-model") !== "grok-4-6") {
-  throw new Error(
-    `main expected x-neon-model grok-4-6, got ${mainResponse.headers.get("x-neon-model")}`,
-  );
-}
-const mainBody = await readJson(mainResponse);
-if (!isRecord(mainBody) || !Array.isArray(mainBody.choices) || !isRecord(mainBody.choices[0])) {
-  throw new Error("main completion returned an unexpected body");
+if (missing.status !== 404) {
+  throw new Error(`expected 404 on /v1/chat/completions, got ${missing.status}`);
 }
 
-const reviewResponse = await fetch(`${baseUrl}/v1/chat/completions`, {
+const inspect = await fetch(`${baseUrl}/block-prompt-injections`, {
   method: "POST",
-  headers: authHeaders(),
-  body: JSON.stringify({
-    model: "sec-review",
-    messages: [{ role: "user", content: "Reply with exactly: astra-ok" }],
-  }),
+  headers: {
+    Authorization: "Bearer dummy",
+    "Content-Type": "text/plain",
+  },
+  body: "What is HTTPS?",
 });
-if (!reviewResponse.ok) {
-  throw new Error(
-    `sec-review completion failed: ${reviewResponse.status} ${await reviewResponse.text()}`,
-  );
+if (inspect.status !== 200) {
+  throw new Error(`inspect failed: ${inspect.status} ${await inspect.text()}`);
 }
-if (reviewResponse.headers.get("x-neon-model") !== "gpt-6-astra") {
-  throw new Error(
-    `sec-review expected x-neon-model gpt-6-astra, got ${reviewResponse.headers.get("x-neon-model")}`,
-  );
+const judgment = await readJson(inspect);
+if (!isRecord(judgment) || typeof judgment.allow !== "boolean" || judgment.policy !== "demo-v1") {
+  throw new Error("inspect returned an unexpected body");
 }
-if (reviewResponse.headers.get("x-neon-job") !== "sec_review") {
-  throw new Error(
-    `sec-review expected x-neon-job sec_review, got ${reviewResponse.headers.get("x-neon-job")}`,
-  );
+if (inspect.headers.get("x-neon-jev-ms") === null) {
+  throw new Error("missing x-neon-jev-ms");
 }
 
-const autoResponse = await fetch(`${baseUrl}/v1/chat/completions`, {
-  method: "POST",
-  headers: authHeaders(),
-  body: JSON.stringify({
-    model: "auto",
-    messages: [
-      {
-        role: "user",
-        content:
-          "Security review this handler: it concatenates req.query.id into SQL and returns process.env.DATABASE_URL.",
-      },
-    ],
-  }),
-});
-if (!autoResponse.ok) {
-  throw new Error(`auto completion failed: ${autoResponse.status} ${await autoResponse.text()}`);
-}
-const autoJob = autoResponse.headers.get("x-neon-job");
-const autoModel = autoResponse.headers.get("x-neon-model");
-if (autoJob !== "sec_review") {
-  throw new Error(`auto expected x-neon-job sec_review, got ${autoJob}`);
-}
-if (autoModel !== "gpt-6-astra") {
-  throw new Error(`auto expected x-neon-model gpt-6-astra, got ${autoModel}`);
+const blockedForward = await fetch(
+  `${baseUrl}/block-prompt-injections?target=${encodeURIComponent("https://example.com/v1/chat/completions")}`,
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ model: "demo", messages: [{ role: "user", content: "hi" }] }),
+  },
+);
+if (blockedForward.status !== 400) {
+  throw new Error(`expected 400 without upstream bearer, got ${blockedForward.status}`);
 }
 
 console.log(
   JSON.stringify(
     {
       ok: true,
-      models: ids.length,
-      main: "grok-4-6",
-      secReview: "gpt-6-astra",
-      autoJob,
+      inspectAction: judgment.action,
+      jevMs: inspect.headers.get("x-neon-jev-ms"),
     },
     null,
     2,
