@@ -4,7 +4,7 @@
 
 ## Documentation
 
-- [API documentation](https://safer-with-jev.com/SITE.md): Request formats, responses, limits and forwarding behavior.
+- [API documentation](https://safer-with-jev.com/AGENTS.md): Request formats, responses, limits and forwarding behavior.
 - [Interactive showcases](https://safer-with-jev.com/): Human-facing examples.
 
 ## API

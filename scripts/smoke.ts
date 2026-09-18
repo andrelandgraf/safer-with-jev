@@ -35,6 +35,9 @@ const homeHtml = await home.text();
 if (!homeHtml.includes("Safer with Jev") || !homeHtml.includes("block-prompt-injections")) {
   throw new Error("homepage HTML is missing expected copy");
 }
+if (!homeHtml.includes("Jev answers yes/no questions")) {
+  throw new Error("homepage is missing the short Noul definition");
+}
 if (!homeHtml.includes("og.png")) {
   throw new Error("homepage is missing the Open Graph image");
 }
@@ -43,16 +46,26 @@ const markdown = await fetch(`${siteUrl}/`, { headers: { Accept: "text/markdown"
 if (markdown.status !== 200 || !(markdown.headers.get("content-type") ?? "").includes("text/markdown")) {
   throw new Error(`expected markdown on Accept text/markdown, got ${markdown.status} ${markdown.headers.get("content-type")}`);
 }
-const siteFile = await fetch(`${siteUrl}/SITE.md`);
-if (siteFile.status !== 200) {
-  throw new Error(`expected 200 on /SITE.md, got ${siteFile.status}`);
+const agentsFile = await fetch(`${siteUrl}/AGENTS.md`);
+if (agentsFile.status !== 200) {
+  throw new Error(`expected 200 on /AGENTS.md, got ${agentsFile.status}`);
 }
-const siteBytes = await siteFile.text();
-if (siteBytes !== (await markdown.text())) {
-  throw new Error("Accept markdown and /SITE.md differ");
+const agentsBytes = await agentsFile.text();
+if (agentsBytes !== (await markdown.text())) {
+  throw new Error("Accept markdown and /AGENTS.md differ");
 }
-if (!siteBytes.includes("api.safer-with-jev.com")) {
-  throw new Error("SITE.md is missing the API host");
+if (!agentsBytes.includes("api.safer-with-jev.com")) {
+  throw new Error("AGENTS.md is missing the API host");
+}
+if (!agentsBytes.includes("Jev answers yes/no questions")) {
+  throw new Error("AGENTS.md is missing the short Noul definition");
+}
+const legacySiteFile = await fetch(`${siteUrl}/SITE.md`);
+if (legacySiteFile.status !== 200) {
+  throw new Error(`expected 200 on /SITE.md, got ${legacySiteFile.status}`);
+}
+if ((await legacySiteFile.text()) !== agentsBytes) {
+  throw new Error("/SITE.md and /AGENTS.md differ");
 }
 
 const sharePaths = [
@@ -105,9 +118,13 @@ for (const path of ["/robots.txt", "/sitemap.xml", "/llms.txt", "/favicon.svg"])
   }
 }
 
-const apiDocs = await fetch(`${apiUrl}/SITE.md`);
+const apiDocs = await fetch(`${apiUrl}/AGENTS.md`);
 if (apiDocs.status !== 200 || !(apiDocs.headers.get("content-type") ?? "").includes("text/markdown")) {
-  throw new Error(`expected markdown on API /SITE.md, got ${apiDocs.status} ${apiDocs.headers.get("content-type")}`);
+  throw new Error(`expected markdown on API /AGENTS.md, got ${apiDocs.status} ${apiDocs.headers.get("content-type")}`);
+}
+const apiLegacyDocs = await fetch(`${apiUrl}/SITE.md`);
+if (apiLegacyDocs.status !== 200 || (await apiLegacyDocs.text()) !== (await apiDocs.text())) {
+  throw new Error("API /SITE.md must match /AGENTS.md");
 }
 
 const apiRoot = await fetch(`${apiUrl}/`);
@@ -115,7 +132,7 @@ if (apiRoot.status !== 200) {
   throw new Error(`expected 200 on API /, got ${apiRoot.status}`);
 }
 const info = await readJson(apiRoot);
-if (!isRecord(info) || info.name !== "Safer with Jev API" || info.docs !== "https://safer-with-jev.com/SITE.md") {
+if (!isRecord(info) || info.name !== "Safer with Jev API" || info.docs !== "https://safer-with-jev.com/AGENTS.md") {
   throw new Error("API root JSON is unexpected");
 }
 

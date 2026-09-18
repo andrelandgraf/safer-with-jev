@@ -16,8 +16,9 @@ const nextConfig: NextConfig = {
     ];
   },
   outputFileTracingIncludes: {
-    "/": ["./content/SITE.md", "../SITE.md"],
-    "/SITE.md": ["./content/SITE.md", "../SITE.md"],
+    "/": ["./content/AGENTS.md"],
+    "/AGENTS.md": ["./content/AGENTS.md"],
+    "/SITE.md": ["./content/AGENTS.md"],
   },
 };
 

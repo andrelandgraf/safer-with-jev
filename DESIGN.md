@@ -11,8 +11,10 @@ Astra wrote the spec, reviewed it, then turned forwarding into a pass-then-forwa
 ## How a call works
 
 ```text
-GET  https://safer-with-jev.com/                         HTML from SITE.md
-GET  https://safer-with-jev.com/  Accept: text/markdown   SITE.md bytes
+GET  https://safer-with-jev.com/                         HTML newspaper
+GET  https://safer-with-jev.com/  Accept: text/markdown   AGENTS.md bytes
+GET  https://safer-with-jev.com/AGENTS.md                 AGENTS.md bytes
+GET  https://safer-with-jev.com/SITE.md                   same bytes as AGENTS.md
 GET  https://safer-with-jev.com/ask-jev                  interactive demo
 GET  https://api.safer-with-jev.com/ask-jev?q=&t=        open yes/no Noul over text
 GET  https://safer-with-jev.com/nice-try                 interactive demo
@@ -206,7 +208,7 @@ Function tools (`type: "function"` + JSON Schema) are in scope. This service nev
 
 ## Unsafe images
 
-Not a public route on this showcase. SITE.md lists caption-then-Jev as a use case. `GET`/`POST`/`PUT` `/block-unsafe-images` returns `404`.
+Not a public route on this showcase. AGENTS.md lists caption-then-Jev as a use case. `GET`/`POST`/`PUT` `/block-unsafe-images` returns `404`.
 
 Jev cannot see pixels. A hosted path would be:
 
@@ -377,7 +379,7 @@ No destination SDK retries. Logs: request id, stage, action, dispatch, status, t
 
 New personal GitHub repo, new personal Neon project in `aws-us-east-2`, org `org-summer-dust-66593634`. Leave `typesafe-on-neon` untouched.
 
-Stack: Bun, Node Function, Hono, `@typesafe-ai/sdk`, image decoder, DNS-pinnable HTTPS client. Vitest against real Jev plus at least two model hosts and two caller-owned upload hosts. `neon.ts` declares AI Gateway (captions), Function, and Lakebase Postgres for limiter counters. GET `/` renders `SITE.md`. No object-storage bucket, no moderation queue. Copy `TYPESAFE_API_KEY` from the existing typesafe-on-neon env; do not mint a Safer API key. Leave that repo's files and deployment untouched.
+Stack: Bun, Node Function, Hono, `@typesafe-ai/sdk`, image decoder, DNS-pinnable HTTPS client. Vitest against real Jev plus at least two model hosts and two caller-owned upload hosts. `neon.ts` declares AI Gateway (captions), Function, and Lakebase Postgres for limiter counters. GET `/` on the site is the React newspaper. Agents read `/AGENTS.md`. No object-storage bucket, no moderation queue. Copy `TYPESAFE_API_KEY` from the existing typesafe-on-neon env; do not mint a Safer API key. Leave that repo's files and deployment untouched.
 
 Later: register `safer-with-jev.com`, put the newspaper site on Vercel, set Function `customDomains` to `api.safer-with-jev.com`, apex on Vercel, `api` CNAME flattening, verify TLS. Personal DNS, not Databricks Neon-zone Terraform.
 

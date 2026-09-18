@@ -2,7 +2,7 @@
 
 Public showcases of TypeSafe Jev judgments. TypeSafe Jev inspects the body, then optionally forwards the same bytes to a caller-chosen HTTPS URL.
 
-Newspaper site: `https://safer-with-jev.com` (Vercel, Next.js). API: `https://api.safer-with-jev.com` (Neon Function `gateway`). No Safer API key. Server `TYPESAFE_API_KEY` only. GET `/` on the site renders `SITE.md`. GET `/ask-jev`, `/nice-try`, `/block-prompt-injections`, and `/block-unsafe-replies` on the site are interactive showcases. Agents can `Accept: text/markdown` on `/` or read `/SITE.md` and `/llms.txt`.
+Newspaper site: `https://safer-with-jev.com` (Vercel, Next.js). API: `https://api.safer-with-jev.com` (Neon Function `gateway`). No Safer API key. Server `TYPESAFE_API_KEY` only. GET `/` is the newspaper. GET `/ask-jev`, `/nice-try`, `/block-prompt-injections`, and `/block-unsafe-replies` on the site are interactive showcases. Agents can `Accept: text/markdown` on `/` or read `/AGENTS.md` and `/llms.txt`. `/SITE.md` serves the same bytes as `/AGENTS.md`.
 
 ```bash
 export SITE_URL="https://safer-with-jev.com"

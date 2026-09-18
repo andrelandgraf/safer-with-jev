@@ -1,6 +1,5 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { NextResponse, type NextRequest } from "next/server";
+import { readAgentsMarkdown } from "@/lib/agents-file";
 import { negotiateAccept } from "@/lib/accept";
 
 export const config = {
@@ -13,16 +12,8 @@ export const config = {
   ],
 };
 
-function siteMarkdown(): Buffer {
-  try {
-    return readFileSync(join(process.cwd(), "content/SITE.md"));
-  } catch {
-    return readFileSync(join(process.cwd(), "../SITE.md"));
-  }
-}
-
 function documentation(kind: "markdown" | "plain", request: NextRequest): Response {
-  const body = request.method === "HEAD" ? null : siteMarkdown().toString("utf8");
+  const body = request.method === "HEAD" ? null : readAgentsMarkdown().toString("utf8");
   return new Response(body, {
     headers: {
       "content-type": kind === "markdown" ? "text/markdown; charset=utf-8" : "text/plain; charset=utf-8",
@@ -38,7 +29,8 @@ export function proxy(request: NextRequest) {
   if (
     (method === "POST" || method === "PUT") &&
     path !== "/" &&
-    path !== "/SITE.md"
+    path !== "/SITE.md" &&
+    path !== "/AGENTS.md"
   ) {
     return NextResponse.json(
       {

@@ -11,7 +11,7 @@ import { STAGE_MS } from "./lib/limits";
 import { servesLegacySite } from "./lib/request-host";
 import { CORS_EXPOSE } from "./lib/response";
 import { sharePageForRequest } from "./lib/share-pages";
-import { SITE_MARKDOWN } from "./lib/site-markdown";
+import { AGENTS_MARKDOWN } from "./lib/agents-markdown";
 import {
   faviconResponse,
   ogPngResponse,
@@ -79,18 +79,22 @@ app.use(
 
 app.get("/", (c) => {
   if (servesLegacySite(c.req.raw)) {
-    return homepageResponse(SITE_MARKDOWN);
+    return homepageResponse(AGENTS_MARKDOWN);
   }
   return apiInfoResponse();
 });
-app.get("/SITE.md", () =>
-  new Response(SITE_MARKDOWN, {
+
+function agentsMarkdownResponse(): Response {
+  return new Response(AGENTS_MARKDOWN, {
     headers: {
       "content-type": "text/markdown; charset=utf-8",
       "cache-control": "public, max-age=120",
     },
-  }),
-);
+  });
+}
+
+app.get("/AGENTS.md", () => agentsMarkdownResponse());
+app.get("/SITE.md", () => agentsMarkdownResponse());
 app.get("/og.png", (c) => (servesLegacySite(c.req.raw) ? ogPngResponse() : notFound()));
 app.get("/og/:file", (c) => {
   if (!servesLegacySite(c.req.raw)) {

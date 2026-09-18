@@ -3,18 +3,24 @@ import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 import { homepageResponse, renderHomepage, SITE_META } from "./homepage";
 import { markdownToHtml } from "./markdown";
-import { SITE_MARKDOWN } from "./site-markdown";
+import { AGENTS_MARKDOWN } from "./agents-markdown";
 
-const siteFile = readFileSync(join(process.cwd(), "SITE.md"), "utf8");
+const agentsFile = readFileSync(join(process.cwd(), "web/content/AGENTS.md"), "utf8");
 
-describe("SITE.md", () => {
+describe("web/content/AGENTS.md", () => {
   test("matches the bundled copy", () => {
-    expect(SITE_MARKDOWN).toBe(siteFile);
+    expect(AGENTS_MARKDOWN).toBe(agentsFile);
+  });
+
+  test("starts with the short Noul definition", () => {
+    expect(agentsFile).toContain("Jev answers yes/no questions");
+    expect(agentsFile).toContain("P(yes)");
+    expect(agentsFile).not.toContain("nextjs-agent-rules");
   });
 
   test("lists image captioning as a use case without a live route", () => {
-    expect(siteFile).toContain("image caption");
-    expect(siteFile).not.toContain("/block-unsafe-images");
+    expect(agentsFile).toContain("image caption");
+    expect(agentsFile).not.toContain("/block-unsafe-images");
   });
 });
 
@@ -45,8 +51,8 @@ describe("markdownToHtml", () => {
 });
 
 describe("homepage", () => {
-  test("GET body is HTML for SITE.md", async () => {
-    const response = homepageResponse(SITE_MARKDOWN);
+  test("GET body is HTML for AGENTS.md", async () => {
+    const response = homepageResponse(AGENTS_MARKDOWN);
     expect(response.headers.get("content-type")).toBe("text/html; charset=utf-8");
     const html = await response.text();
     expect(html).toContain('<main class="site">');
@@ -58,11 +64,11 @@ describe("homepage", () => {
     expect(html).toContain("/nice-try?p=");
     expect(html).toContain("/ask-jev?");
     expect(html).toContain("<!doctype html>");
-    expect(renderHomepage(SITE_MARKDOWN)).toBe(html);
+    expect(renderHomepage(AGENTS_MARKDOWN)).toBe(html);
   });
 
   test("includes title, description, and social tags", async () => {
-    const html = await homepageResponse(SITE_MARKDOWN).text();
+    const html = await homepageResponse(AGENTS_MARKDOWN).text();
     expect(html).toContain(`<title>${SITE_META.title}</title>`);
     expect(html).toContain(`content="${SITE_META.description}"`);
     expect(html).toContain('property="og:image" content="https://safer-with-jev.com/og.png"');

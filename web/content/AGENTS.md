@@ -1,8 +1,8 @@
 # Safer with Jev
 
-[TypeSafe AI](https://typesafe.ai) just released Jev - a System One model. It's a decision model that can't produce chat output. Instead, you ask a yes/no question and get a Noul: P(yes), between 0 and 1.
+Jev answers yes/no questions. You give it a question and some text. It doesn't write a reply. It returns a Noul: P(yes), a number from 0 to 1. Near 1 means yes. Near 0 means no. Near 0.5 means unsure.
 
-I built these demos with `jev-latest` to try it on text, code and prompt injections.
+[TypeSafe AI](https://typesafe.ai) just released Jev as a System One model: a decision model. I built these demos with `jev-latest` to try it on text, code and prompt injections.
 
 ## Jev use cases
 

@@ -8,6 +8,7 @@ import {
   REPLY_EXAMPLES,
   TEXT_MAX_BYTES,
 } from "@/lib/examples";
+import { JevIntro } from "./JevIntro";
 import { JudgmentResult } from "./JudgmentResult";
 import { useInspectCall } from "./useInspectCall";
 
@@ -58,11 +59,7 @@ export function Landing() {
   return (
     <main className="site">
       <h1>Safer with Jev</h1>
-      <p>
-        <a href="https://typesafe.ai">TypeSafe AI</a> just released Jev - a System One model. It's
-        a decision model that can't produce chat output. Instead, you ask a yes/no question and get
-        a Noul: P(yes), between 0 and 1.
-      </p>
+      <JevIntro />
       <p>I built these demos with <code>jev-latest</code> to try it on text, code and prompt injections.</p>
 
       <h2>Jev use cases</h2>
@@ -80,7 +77,7 @@ export function Landing() {
       <p>
         The API runs in a Neon Function at{" "}
         <a href="https://api.safer-with-jev.com">https://api.safer-with-jev.com</a>. The request
-        contract is in <a href="/SITE.md">SITE.md</a>.
+        contract is in <a href="/AGENTS.md">AGENTS.md</a>.
       </p>
 
       <AskStory />
@@ -100,7 +97,7 @@ export function Landing() {
         <li>Every forward needs your destination and credentials.</li>
       </ul>
       <p>
-        Model POST and reply PUT examples live in <a href="/SITE.md">SITE.md</a>.
+        Model POST and reply PUT examples live in <a href="/AGENTS.md">AGENTS.md</a>.
       </p>
 
       <h2>Limits</h2>

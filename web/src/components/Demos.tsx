@@ -9,6 +9,7 @@ import {
   TEXT_MAX_BYTES,
 } from "@/lib/examples";
 import { SHARE_PAGES, type ShareSlug } from "@/lib/site";
+import { JevIntro } from "./JevIntro";
 import { JudgmentResult } from "./JudgmentResult";
 import { useInspectCall } from "./useInspectCall";
 
@@ -48,6 +49,7 @@ export function AskDemo({
         <br />
         {SHARE_PAGES["ask-jev"].cardLine2}
       </h1>
+      <JevIntro />
       <p>
         <a href="/">safer-with-jev.com</a>
       </p>
@@ -155,6 +157,7 @@ function TextDemo({
         <br />
         {copy.cardLine2}
       </h1>
+      <JevIntro />
       <p>
         <a href="/">safer-with-jev.com</a>
       </p>
