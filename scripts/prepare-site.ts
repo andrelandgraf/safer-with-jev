@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 // Next.js regenerates web/AGENTS.md. The public contract is web/content/AGENTS.md.
 const markdown = readFileSync(join(root, "web/content/AGENTS.md"));
-if (!markdown.includes("Jev answers yes/no questions")) {
+if (!markdown.includes('first public "System One" class model')) {
   throw new Error("web/content/AGENTS.md is missing expected copy");
 }
 

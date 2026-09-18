@@ -90,7 +90,7 @@ export function AskDemo({
         <textarea
           id="t"
           name="t"
-          rows={6}
+          rows={16}
           value={t}
           disabled={inspect.state.kind === "pending"}
           onChange={(event) => {

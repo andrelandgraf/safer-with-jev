@@ -30,12 +30,12 @@ export const SHARE_PAGES = {
     cardLine2: "Yes or no.",
   },
   "nice-try": {
-    title: "Nice try",
+    title: "Scan for prompt injection",
     description: "See whether Jev flags your prompt as an injection.",
-    ogTitle: "Nice try",
+    ogTitle: "Scan for prompt injection",
     ogDescription: "See whether Jev flags your prompt as an injection.",
-    ogImageAlt: "Safer with Jev. Nice try. Is that an injection?",
-    cardLine1: "Nice try.",
+    ogImageAlt: "Safer with Jev. Scan for prompt injection. Is that an injection?",
+    cardLine1: "Scan for prompt injection.",
     cardLine2: "Is that an injection?",
   },
   "block-prompt-injections": {

@@ -32,11 +32,11 @@ if (!homeType.includes("text/html")) {
   throw new Error(`expected HTML on site /, got ${homeType}`);
 }
 const homeHtml = await home.text();
-if (!homeHtml.includes("Safer with Jev") || !homeHtml.includes("block-prompt-injections")) {
+if (!homeHtml.includes("Safer with Jev") || !homeHtml.includes("Jev showcases")) {
   throw new Error("homepage HTML is missing expected copy");
 }
-if (!homeHtml.includes("Jev answers yes/no questions")) {
-  throw new Error("homepage is missing the short Noul definition");
+if (!homeHtml.includes("not a chat model")) {
+  throw new Error("homepage is missing the TypeSafe Jev announcement");
 }
 if (!homeHtml.includes("og.png")) {
   throw new Error("homepage is missing the Open Graph image");
@@ -57,8 +57,8 @@ if (agentsBytes !== (await markdown.text())) {
 if (!agentsBytes.includes("api.safer-with-jev.com")) {
   throw new Error("AGENTS.md is missing the API host");
 }
-if (!agentsBytes.includes("Jev answers yes/no questions")) {
-  throw new Error("AGENTS.md is missing the short Noul definition");
+if (!agentsBytes.includes('first public "System One" class model')) {
+  throw new Error("AGENTS.md is missing the TypeSafe Jev announcement");
 }
 const legacySiteFile = await fetch(`${siteUrl}/SITE.md`);
 if (legacySiteFile.status !== 200) {
