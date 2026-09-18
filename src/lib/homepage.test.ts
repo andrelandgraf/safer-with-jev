@@ -18,6 +18,13 @@ describe("web/content/AGENTS.md", () => {
     expect(agentsFile).not.toContain("nextjs-agent-rules");
   });
 
+  test("comment examples stay ordinary", () => {
+    expect(agentsFile).toContain(
+      "Hey! Tech is amazing right now! Love all the amazing developments that are pushing the boundaries and our society forward!",
+    );
+    expect(agentsFile).not.toContain("pathetic loser");
+  });
+
   test("lists image captioning as a use case without a live route", () => {
     expect(agentsFile).toContain("generate a caption");
     expect(agentsFile).not.toContain("/block-unsafe-images");

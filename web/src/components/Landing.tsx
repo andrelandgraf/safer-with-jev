@@ -34,8 +34,8 @@ const NICE_DEFAULT = requiredExample(
   "override",
 );
 const COMMENT_DEFAULT = requiredExample(
-  COMMENT_EXAMPLES.find((example) => example.id === "harassment"),
-  "harassment",
+  COMMENT_EXAMPLES.find((example) => example.id === "tech"),
+  "tech",
 );
 
 const ASK_CODE_CURL = `curl -i --get 'https://api.safer-with-jev.com/ask-jev' \\

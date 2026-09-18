@@ -120,9 +120,9 @@ export const COMMENT_EXAMPLES: TextExample[] = [
     text: "Loved the live demo today. The branching example finally made it click.",
   },
   {
-    id: "harassment",
-    label: "Harassment",
-    text: "You're a pathetic loser and nobody wants you in this server. I'll keep humiliating you in every thread you join until you leave.",
+    id: "tech",
+    label: "Tech is amazing",
+    text: "Hey! Tech is amazing right now! Love all the amazing developments that are pushing the boundaries and our society forward!",
   },
 ];
 

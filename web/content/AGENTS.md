@@ -122,12 +122,12 @@ Omit `target` to inspect without forwarding. A completed inspection returns `all
 Ask Jev whether a comment violates community policies against hate speech or harassment:
 
 - [Loved the live demo today. The branching example finally made it click.](https://safer-with-jev.com/ask-jev?q=Does%20this%20comment%20violate%20community%20policies%20against%20hate%20speech%20or%20harassment%3F&t=Loved%20the%20live%20demo%20today.%20The%20branching%20example%20finally%20made%20it%20click.)
-- [You're a pathetic loser and nobody wants you in this server. I'll keep humiliating you in every thread you join until you leave.](https://safer-with-jev.com/ask-jev?q=Does%20this%20comment%20violate%20community%20policies%20against%20hate%20speech%20or%20harassment%3F&t=You're%20a%20pathetic%20loser%20and%20nobody%20wants%20you%20in%20this%20server.%20I'll%20keep%20humiliating%20you%20in%20every%20thread%20you%20join%20until%20you%20leave.)
+- [Hey! Tech is amazing right now! Love all the amazing developments that are pushing the boundaries and our society forward!](https://safer-with-jev.com/ask-jev?q=Does%20this%20comment%20violate%20community%20policies%20against%20hate%20speech%20or%20harassment%3F&t=Hey%21%20Tech%20is%20amazing%20right%20now%21%20Love%20all%20the%20amazing%20developments%20that%20are%20pushing%20the%20boundaries%20and%20our%20society%20forward%21)
 
 ```bash
 curl -i --get 'https://api.safer-with-jev.com/ask-jev' \
   --data-urlencode 'q=Does this comment violate community policies against hate speech or harassment?' \
-  --data-urlencode "t=You're a pathetic loser and nobody wants you in this server. I'll keep humiliating you in every thread you join until you leave."
+  --data-urlencode 't=Hey! Tech is amazing right now! Love all the amazing developments that are pushing the boundaries and our society forward!'
 ```
 
 ### Inspect a reply
