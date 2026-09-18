@@ -1,0 +1,264 @@
+:root {
+  color-scheme: light;
+  --bg: #cfcbc4;
+  --fg: #171614;
+  --muted: #5e5b55;
+  --accent: #1a5c3a;
+  --code: #e4e0d8;
+  --line: #9a958c;
+  --font-serif: var(--font-newsreader), "Iowan Old Style", Palatino, Georgia, serif;
+  --font-mono: var(--font-ibm), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  font-family: var(--font-serif);
+  font-optical-sizing: auto;
+  font-size: 1.125rem;
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+main {
+  max-width: 38rem;
+  margin: 0 auto;
+  padding: 3rem 1.2rem 5.5rem;
+}
+
+h1 {
+  font-size: clamp(2.35rem, 7vw, 3.35rem);
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  line-height: 1.02;
+  margin: 0 0 1.15rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2.5px solid var(--fg);
+  text-wrap: balance;
+}
+
+h2 {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg);
+  margin: 2.4rem 0 0.9rem;
+  padding: 0.38rem 0;
+  border-top: 1px solid var(--fg);
+  border-bottom: 1px solid var(--fg);
+}
+
+h3 {
+  font-size: 1.28rem;
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: -0.015em;
+  margin: 1.6rem 0 0.4rem;
+}
+
+p {
+  margin: 0.72rem 0;
+}
+
+main.site > p:first-of-type::first-letter {
+  float: left;
+  font-size: 3.55rem;
+  font-weight: 700;
+  line-height: 0.78;
+  padding: 0.08em 0.1em 0 0;
+}
+
+main.share h2:first-child {
+  margin-top: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: color-mix(in srgb, var(--fg) 45%, transparent);
+  text-underline-offset: 0.16em;
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  background: var(--code);
+  padding: 0.08em 0.28em;
+  border-radius: 0.12rem;
+}
+
+pre {
+  overflow-x: auto;
+  background: var(--code);
+  border: 1px solid var(--line);
+  border-radius: 0.12rem;
+  padding: 0.95rem 1rem;
+  margin: 1rem 0;
+}
+
+pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.78em;
+}
+
+ul {
+  padding-left: 1.2rem;
+}
+
+main.site > ul:first-of-type {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.85rem 0 1.1rem;
+}
+
+button.chip,
+a.demo-open {
+  display: inline-block;
+  padding: 0.28rem 0.7rem 0.32rem;
+  border: 1px solid var(--fg);
+  border-radius: 0;
+  text-decoration: none;
+  font: inherit;
+  font-size: 0.95rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+button.chip:hover,
+a.demo-open:hover,
+main.site > ul:first-of-type button.chip:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+button.chip:focus-visible,
+a.demo-open:focus-visible,
+button[type="submit"]:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.demo-more {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+main > p:last-child {
+  margin-top: 2.8rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--fg);
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 1.2rem 0 0.35rem;
+}
+
+input[type="text"],
+input:not([type]),
+input[type="file"],
+textarea {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  background: var(--code);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  padding: 0.7rem 0.8rem;
+}
+
+button[type="submit"] {
+  margin-top: 1rem;
+  padding: 0.38rem 0.95rem 0.42rem;
+  border: 1px solid var(--fg);
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+button[type="submit"]:hover:not(:disabled) {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+button[type="submit"]:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.result {
+  margin-top: 1.4rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--fg);
+}
+
+.result-kicker {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 0 0 0.35rem;
+}
+
+.result-label {
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.4rem;
+  line-height: 1.1;
+}
+
+.timings {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.preview {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.8rem 0;
+  border: 1px solid var(--line);
+}
+
+details {
+  margin: 0.8rem 0;
+}
+
+summary {
+  cursor: pointer;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--accent) 28%, var(--bg));
+}

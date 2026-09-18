@@ -2,7 +2,7 @@
 
 A personal DevRel demo: TypeSafe Jev as an HTTP gate in front of any OpenAI-compatible model endpoint and any presigned PUT. The HTTP API has no caller auth. Jev runs on a pre-existing server `TYPESAFE_API_KEY` (the same key `typesafe-on-neon` already holds). Neon Functions host it; AI Gateway is used only for image captions.
 
-Ship as a Neon Function. Day-one host is the Function URL. Public name is `safer-with-jev.com` after you register it. Not `safer-with.jev.com` (we do not own `jev.com`).
+Ship as a Neon Function API plus a Next.js newspaper site on Vercel. Day-one API host is the Function URL. Public names are `safer-with-jev.com` (site) and `api.safer-with-jev.com` (API). Not `safer-with.jev.com` (we do not own `jev.com`).
 
 This is a demo of judgments, timings, and a pass-then-forward proxy. It is not a trust-and-safety product, not legal advice, and not a CSAM detector. Jev accepts text only; image scores are scores of a generated caption.
 
@@ -11,23 +11,24 @@ Astra wrote the spec, reviewed it, then turned forwarding into a pass-then-forwa
 ## How a call works
 
 ```text
-GET  /                         HTML from SITE.md
-GET  /ask-jev                  share page (HTML + og)
-GET  /ask-jev?q=&t=            open yes/no Noul over text
-GET  /nice-try                 share page (HTML + og)
-GET  /nice-try?p=<text>        prompt-injection inspect, query only
-GET  /block-*                  share page (HTML + og)
-POST /block-prompt-injections
-POST /block-unsafe-images
-POST /block-unsafe-replies
-PUT  /block-*
+GET  https://safer-with-jev.com/                         HTML from SITE.md
+GET  https://safer-with-jev.com/  Accept: text/markdown   SITE.md bytes
+GET  https://safer-with-jev.com/ask-jev                  interactive demo
+GET  https://api.safer-with-jev.com/ask-jev?q=&t=        open yes/no Noul over text
+GET  https://safer-with-jev.com/nice-try                 interactive demo
+GET  https://api.safer-with-jev.com/nice-try?p=<text>    prompt-injection inspect
+GET  https://safer-with-jev.com/block-*                  interactive demos
+POST https://api.safer-with-jev.com/block-prompt-injections
+POST https://api.safer-with-jev.com/block-unsafe-images
+POST https://api.safer-with-jev.com/block-unsafe-replies
+PUT  https://api.safer-with-jev.com/block-*
 ```
 
 No Safer key. Inspect ignores `Authorization`, including dummy bearers. TypeSafe credentials are server env only; no caller header can supply or override them. Missing `TYPESAFE_API_KEY` prevents startup.
 
 Omit `target` to inspect. Add it to forward only after `action=pass`. Review and block never forward. Every forward uses the caller's URL and credentials. There is no hosted model or PUT default: that would be an open paid proxy.
 
-GET `/nice-try` without `p`, GET `/ask-jev` without both `q` and `t`, and GET `/block-*` return a newsprint share page with Open Graph tags. Slackbot and other unfurl crawlers get that HTML even when inspect query params are present, so a shared demo URL still cards. JSON inspect is otherwise unchanged: `/nice-try` is inspect-only (`p`, no body, no `target`); `/ask-jev` is inspect-only (`q` yes/no, `t` the text). Ask JSON is `{ noul, jevMs }` — P(yes) and the Jev call duration in milliseconds, not the Safer pass/review/block policy.
+GET `/nice-try` without `p`, GET `/ask-jev` without both `q` and `t`, and GET `/block-*` on the **site** host return a newsprint demo with Open Graph tags. Slackbot and other unfurl crawlers get that HTML. JSON inspect lives on `api.safer-with-jev.com`: `/nice-try` is inspect-only (`p`, no body, no `target`); `/ask-jev` is inspect-only (`q` yes/no, `t` the text). Ask JSON is `{ noul, jevMs }` — P(yes) and the Jev call duration in milliseconds, not the Safer pass/review/block policy.
 
 ```text
 No target            → 200  judgment JSON
@@ -37,7 +38,8 @@ target + block       → 403  judgment JSON
 ```
 
 ```bash
-export BASE_URL="https://<function-host>"
+export SITE_URL="https://safer-with-jev.com"
+export API_URL="https://api.safer-with-jev.com"
 ```
 
 ## Destinations
@@ -386,7 +388,7 @@ New personal GitHub repo, new personal Neon project in `aws-us-east-2`, org `org
 
 Stack: Bun, Node Function, Hono, `@typesafe-ai/sdk`, image decoder, DNS-pinnable HTTPS client. Vitest against real Jev plus at least two model hosts and two caller-owned upload hosts. `neon.ts` declares AI Gateway (captions), Function, and Lakebase Postgres for limiter counters. GET `/` renders `SITE.md`. No object-storage bucket, no moderation queue. Copy `TYPESAFE_API_KEY` from the existing typesafe-on-neon env; do not mint a Safer API key. Leave that repo's files and deployment untouched.
 
-Later: register `safer-with-jev.com`, set Function `customDomains`, apex CNAME flattening, verify TLS. Personal DNS, not Databricks Neon-zone Terraform.
+Later: register `safer-with-jev.com`, put the newspaper site on Vercel, set Function `customDomains` to `api.safer-with-jev.com`, apex on Vercel, `api` CNAME flattening, verify TLS. Personal DNS, not Databricks Neon-zone Terraform.
 
 ## v1 will not
 

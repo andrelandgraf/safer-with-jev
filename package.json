@@ -4,10 +4,16 @@
   "private": true,
   "type": "module",
   "description": "Public HTTP gates that run TypeSafe Jev, then optionally proxy a caller-chosen HTTPS model or presigned PUT.",
+  "workspaces": ["web"],
   "scripts": {
+    "prepare-site": "bun scripts/prepare-site.ts",
+    "pretest": "bun scripts/prepare-site.ts",
     "dev": "neon dev",
+    "dev:api": "neon dev",
+    "dev:web": "bun scripts/prepare-site.ts && bun run --filter web dev",
     "deploy": "neon deploy --env .env.local",
-    "typecheck": "tsc --noEmit",
+    "build": "bun scripts/prepare-site.ts && bun run --filter web build",
+    "typecheck": "bun scripts/prepare-site.ts && tsc --noEmit && bun run --filter web typecheck",
     "test": "vitest run",
     "smoke": "bun scripts/smoke.ts"
   },

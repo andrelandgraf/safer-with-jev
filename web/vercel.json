@@ -1,0 +1,4 @@
+{
+  "installCommand": "bun install --cwd ..",
+  "buildCommand": "bun ../scripts/prepare-site.ts && bun run next build"
+}

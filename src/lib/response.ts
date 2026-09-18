@@ -26,6 +26,7 @@ export const CORS_EXPOSE = [
   "x-neon-action",
   "x-neon-jev-ms",
   "x-neon-request-id",
+  "Retry-After",
 ] as const;
 
 export function inspectBody(judgment: Judgment, jevMs: number): InspectBody {
