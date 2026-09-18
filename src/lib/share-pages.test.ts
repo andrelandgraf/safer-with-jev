@@ -15,7 +15,7 @@ function get(path: string, init?: RequestInit): Request {
 describe("wantsSharePage", () => {
   test("serves HTML on GET block routes", () => {
     expect(wantsSharePage(get("/block-prompt-injections"))).toBe(true);
-    expect(wantsSharePage(get("/block-unsafe-images"))).toBe(true);
+    expect(wantsSharePage(get("/block-unsafe-images"))).toBe(false);
     expect(wantsSharePage(get("/block-unsafe-replies"))).toBe(true);
   });
 

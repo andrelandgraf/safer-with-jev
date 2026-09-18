@@ -96,7 +96,7 @@ export function Landing({ markdown }: { markdown: string }) {
                     ),
                   )}
                   <a className="demo-open" href="/ask-jev">
-                    Open the Ask Jev demo
+                    Open the Ask Jev showcase
                   </a>
                 </p>
                 <JudgmentResult state={ask.state} />
@@ -116,7 +116,7 @@ export function Landing({ markdown }: { markdown: string }) {
                     </button>
                   ))}
                   <a className="demo-open" href="/nice-try">
-                    Open the Nice try demo
+                    Open the Nice try showcase
                   </a>
                 </p>
                 <JudgmentResult state={nice.state} />

@@ -24,12 +24,13 @@ describe("parseRouting", () => {
     }
   });
 
-  test("rejects POST image with target", () => {
+  test("404s the image route", () => {
+    expect(() => parseRouting(request("/block-unsafe-images"))).toThrow(/Not found/);
     expect(() =>
       parseRouting(
         request("/block-unsafe-images?target=https%3A%2F%2Fexample.com%2Fput"),
       ),
-    ).toThrow(/PUT/);
+    ).toThrow(/Not found/);
   });
 
   test("rejects obsolete routing inputs", () => {
@@ -46,7 +47,7 @@ describe("parseRouting", () => {
   test("rejects PUT with Authorization", () => {
     expect(() =>
       parseRouting(
-        new Request("https://safer.example/block-unsafe-images?target=https://example.com/x", {
+        new Request("https://safer.example/block-unsafe-replies?target=https://example.com/x", {
           method: "PUT",
           headers: { authorization: "Bearer x" },
         }),

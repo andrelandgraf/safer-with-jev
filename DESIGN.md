@@ -17,11 +17,12 @@ GET  https://safer-with-jev.com/ask-jev                  interactive demo
 GET  https://api.safer-with-jev.com/ask-jev?q=&t=        open yes/no Noul over text
 GET  https://safer-with-jev.com/nice-try                 interactive demo
 GET  https://api.safer-with-jev.com/nice-try?p=<text>    prompt-injection inspect
-GET  https://safer-with-jev.com/block-*                  interactive demos
+GET  https://safer-with-jev.com/block-prompt-injections  interactive demo
+GET  https://safer-with-jev.com/block-unsafe-replies     interactive demo
 POST https://api.safer-with-jev.com/block-prompt-injections
-POST https://api.safer-with-jev.com/block-unsafe-images
 POST https://api.safer-with-jev.com/block-unsafe-replies
-PUT  https://api.safer-with-jev.com/block-*
+PUT  https://api.safer-with-jev.com/block-prompt-injections
+PUT  https://api.safer-with-jev.com/block-unsafe-replies
 ```
 
 No Safer key. Inspect ignores `Authorization`, including dummy bearers. TypeSafe credentials are server env only; no caller header can supply or override them. Missing `TYPESAFE_API_KEY` prevents startup.
@@ -50,16 +51,16 @@ Drop `destination`, `X-Safer-Target`, `X-Safer-Upstream-Authorization`, and `key
 
 ```text
 POST /block-prompt-injections
-POST /block-unsafe-images
 POST /block-unsafe-replies
-PUT  /block-*
+PUT  /block-prompt-injections
+PUT  /block-unsafe-replies
 ```
 
 | Request | No `target` | With `target` |
 |---|---|---|
 | POST `/block-prompt-injections` | inspect text or JSON | POST original bytes; JSON must be Chat Completions or Responses |
-| POST image/reply routes | inspect | `400` — upload forward is PUT |
-| PUT `/block-*` | inspect | PUT original bytes |
+| POST `/block-unsafe-replies` | inspect | `400` — upload forward is PUT |
+| PUT `/block-unsafe-replies` | inspect | PUT original bytes |
 
 Empty or repeated `target` is `400`. Decode the outer query once. Keep the inner URL's escaped path and query byte-stable (signed queries). Model and PUT targets may include query strings.
 
@@ -74,9 +75,9 @@ curl -i "$BASE_URL/block-prompt-injections?target=https%3A%2F%2Fapi.openai.com%2
 ENCODED_TARGET="$(node -e 'process.stdout.write(encodeURIComponent(process.env.PRESIGNED_PUT_URL))')"
 
 curl -i -X PUT \
-  "$BASE_URL/block-unsafe-images?target=$ENCODED_TARGET" \
-  -H "Content-Type: image/png" \
-  --data-binary @image.png
+  "$BASE_URL/block-unsafe-replies?target=$ENCODED_TARGET" \
+  -H "Content-Type: text/plain" \
+  --data-binary @reply.txt
 ```
 
 Read the body once into a bounded buffer. Judge a view of those bytes. On pass, dispatch **the same bytes**. No JSON round-trip, no model-id rewrite, no re-encode.
@@ -205,22 +206,12 @@ Function tools (`type: "function"` + JSON Schema) are in scope. This service nev
 
 ## Unsafe images
 
-Jev cannot see pixels. Pipeline:
+Not a public route on this showcase. SITE.md lists caption-then-Jev as a use case. `GET`/`POST`/`PUT` `/block-unsafe-images` returns `404`.
+
+Jev cannot see pixels. A hosted path would be:
 
 ```text
 bytes → magic sniff + full decode → vision caption → Jev → optional PUT of original bytes
-```
-
-```bash
-curl -i "$BASE_URL/block-unsafe-images" \
-  -H "Content-Type: image/png" \
-  --data-binary @image.png
-
-ENCODED_TARGET="$(node -e 'process.stdout.write(encodeURIComponent(process.env.PRESIGNED_PUT_URL))')"
-curl -i -X PUT \
-  "$BASE_URL/block-unsafe-images?target=$ENCODED_TARGET" \
-  -H "Content-Type: image/png" \
-  --data-binary @image.png
 ```
 
 Static JPEG, PNG, or WebP. Declared MIME must match sniffed format. Reject animated / multi-frame, corrupt, truncated, and decoder-limit violations.

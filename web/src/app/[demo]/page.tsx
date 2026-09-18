@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { AskDemo, ImageDemo, NiceTryDemo, PromptDemo, ReplyDemo } from "@/components/Demos";
+import { AskDemo, NiceTryDemo, PromptDemo, ReplyDemo } from "@/components/Demos";
 import { demoMetadata } from "@/lib/metadata";
 import { ASK_EXAMPLES, NICE_TRY_EXAMPLES, PROMPT_EXAMPLES, REPLY_EXAMPLES } from "@/lib/examples";
 import { prefillOrEmpty, singleQueryParam } from "@/lib/query";
@@ -65,5 +65,6 @@ function Demo({
   if (slug === "block-unsafe-replies") {
     return <ReplyDemo initial={REPLY_EXAMPLES[0]?.text ?? ""} />;
   }
-  return <ImageDemo />;
+  const _exhaustive: never = slug;
+  return _exhaustive;
 }

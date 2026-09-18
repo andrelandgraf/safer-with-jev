@@ -9,7 +9,6 @@ export const config = {
     "/ask-jev",
     "/nice-try",
     "/block-prompt-injections",
-    "/block-unsafe-images",
     "/block-unsafe-replies",
   ],
 };

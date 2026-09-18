@@ -6,7 +6,6 @@ export const SHARE_SLUGS = [
   "ask-jev",
   "nice-try",
   "block-prompt-injections",
-  "block-unsafe-images",
   "block-unsafe-replies",
 ] as const;
 
@@ -49,15 +48,6 @@ export const SHARE_PAGES = {
     ogImageAlt: "Safer with Jev. Check the prompt. Before forwarding.",
     cardLine1: "Check the prompt.",
     cardLine2: "Before forwarding.",
-  },
-  "block-unsafe-images": {
-    title: "Block unsafe images",
-    description: "Check images for unsafe content with Jev.",
-    ogTitle: "Block unsafe images",
-    ogDescription: "Check images for unsafe content with Jev.",
-    ogImageAlt: "Safer with Jev. Check the image. Before it goes through.",
-    cardLine1: "Check the image.",
-    cardLine2: "Before it goes through.",
   },
   "block-unsafe-replies": {
     title: "Block unsafe replies",

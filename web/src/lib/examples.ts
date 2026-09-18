@@ -83,6 +83,4 @@ export const REPLY_EXAMPLES: TextExample[] = [
   },
 ];
 
-export const TEACUP_IMAGE_PATH = "/examples/teacup.png";
-export const IMAGE_MAX_BYTES = 5 * 1024 * 1024;
 export const TEXT_MAX_BYTES = 256 * 1024;

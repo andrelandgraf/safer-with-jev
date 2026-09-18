@@ -1,21 +1,20 @@
 # Safer with Jev
 
-> A public demo of TypeSafe Jev judgments for text, prompt injections, image captions and assistant replies.
+> Public showcases of TypeSafe Jev judgments: yes/no questions, prompt injections, and assistant replies.
 
 ## Documentation
 
 - [API documentation](https://safer-with-jev.com/SITE.md): Request formats, responses, limits and forwarding behavior.
-- [Interactive demos](https://safer-with-jev.com/): Human-facing examples.
+- [Interactive showcases](https://safer-with-jev.com/): Human-facing examples.
 
 ## API
 
 - [API host](https://api.safer-with-jev.com/): Send inspect and forwarding requests here.
 
-The site host serves HTML demos. The API host serves JSON and forwarding responses.
+The site host serves HTML showcases. The API host serves JSON and forwarding responses.
 Inspection requires no Safer API key.
 GET /ask-jev uses q and t. GET /nice-try uses p.
 POST /block-prompt-injections and /block-unsafe-replies accept text.
-POST /block-unsafe-images accepts static JPEG, PNG or WebP file bytes.
-Images are judged through generated captions.
+Image-caption judging is a listed Jev use case. This showcase does not accept image bytes.
 Forwarding requires a caller-supplied target and destination credentials.
 Use throwaway content. GET query strings can appear in history and logs.

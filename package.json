@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Public HTTP gates that run TypeSafe Jev, then optionally proxy a caller-chosen HTTPS model or presigned PUT.",
+  "description": "Public showcases of TypeSafe Jev judgments, with optional HTTPS forwarding after a pass.",
   "workspaces": ["web"],
   "scripts": {
     "prepare-site": "bun scripts/prepare-site.ts",

@@ -58,5 +58,6 @@ describe("static pages", () => {
     expect(body).toContain("<loc>https://safer-with-jev.com/</loc>");
     expect(body).toContain("<loc>https://safer-with-jev.com/ask-jev</loc>");
     expect(body).toContain("<loc>https://safer-with-jev.com/block-unsafe-replies</loc>");
+    expect(body).not.toContain("block-unsafe-images");
   });
 });

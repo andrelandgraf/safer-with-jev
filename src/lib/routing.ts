@@ -100,6 +100,10 @@ export function parseRouting(request: Request): Routing {
     };
   }
 
+  if (path === "/block-unsafe-images") {
+    throw new HttpError(404, "not_found", "Not found.", "validation");
+  }
+
   const route = routeName(path);
   if (!route) {
     throw new HttpError(404, "not_found", "Not found.", "validation");

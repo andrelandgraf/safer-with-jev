@@ -4,7 +4,7 @@ Personal demo. GitHub `andrelandgraf/safer-with-jev`. Neon org `org-summer-dust-
 
 Newspaper site: Vercel project `safer-with-jev`, production domain `safer-with-jev.com`. Next.js app in `web/`.
 
-API: Function slug `gateway`, custom domain `api.safer-with-jev.com`. Native URL: `neon functions get gateway`. AI Gateway is caption-only. TypeSafe Jev (`jev-latest`) scores prompt injections, image captions, and replies.
+API: Function slug `gateway`, custom domain `api.safer-with-jev.com`. Native URL: `neon functions get gateway`. AI Gateway is caption-only and unused while `/block-unsafe-images` is 404. TypeSafe Jev (`jev-latest`) scores prompt injections and replies. Image-caption judging is listed as a use case, not a public route.
 
 `neon.ts` uploads `NEON_FUNCTION_GATEWAY_BASE_URL` as Function env. The Functions load path calls `parseEnv` and requires that key; the runtime does not inject it. `neon env pull` writes it locally.
 

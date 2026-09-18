@@ -11,6 +11,11 @@ describe("SITE.md", () => {
   test("matches the bundled copy", () => {
     expect(SITE_MARKDOWN).toBe(siteFile);
   });
+
+  test("lists image captioning as a use case without a live route", () => {
+    expect(siteFile).toContain("image caption");
+    expect(siteFile).not.toContain("/block-unsafe-images");
+  });
 });
 
 describe("markdownToHtml", () => {

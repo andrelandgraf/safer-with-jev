@@ -59,7 +59,6 @@ const sharePaths = [
   "/ask-jev",
   "/nice-try",
   "/block-prompt-injections",
-  "/block-unsafe-images",
   "/block-unsafe-replies",
 ] as const;
 for (const path of sharePaths) {
@@ -127,6 +126,19 @@ const missing = await fetch(`${apiUrl}/v1/chat/completions`, {
 });
 if (missing.status !== 404) {
   throw new Error(`expected 404 on /v1/chat/completions, got ${missing.status}`);
+}
+
+const imageGone = await fetch(`${apiUrl}/block-unsafe-images`, {
+  method: "POST",
+  headers: { "Content-Type": "image/png" },
+  body: "not-an-image",
+});
+if (imageGone.status !== 404) {
+  throw new Error(`expected 404 on API /block-unsafe-images, got ${imageGone.status}`);
+}
+const imagePage = await fetch(`${siteUrl}/block-unsafe-images`);
+if (imagePage.status !== 404) {
+  throw new Error(`expected 404 on site /block-unsafe-images, got ${imagePage.status}`);
 }
 
 const inspect = await fetch(`${apiUrl}/block-prompt-injections`, {

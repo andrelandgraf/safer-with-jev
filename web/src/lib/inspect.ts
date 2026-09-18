@@ -3,8 +3,7 @@ import { parseAskResult, parseInspectResult, type AskResult, type InspectResult 
 export type InspectCall =
   | { kind: "ask"; q: string; t: string }
   | { kind: "nice-try"; p: string }
-  | { kind: "text"; path: "/block-prompt-injections" | "/block-unsafe-replies"; body: string }
-  | { kind: "image"; body: Blob; type: string };
+  | { kind: "text"; path: "/block-prompt-injections" | "/block-unsafe-replies"; body: string };
 
 export type InspectOk = {
   kind: "ok";
@@ -70,15 +69,10 @@ export async function fetchInspect(
   } else if (call.kind === "nice-try") {
     url = new URL("/nice-try", origin);
     url.searchParams.set("p", call.p);
-  } else if (call.kind === "text") {
+  } else {
     url = new URL(call.path, origin);
     method = "POST";
     headers.set("content-type", "text/plain");
-    body = call.body;
-  } else {
-    url = new URL("/block-unsafe-images", origin);
-    method = "POST";
-    headers.set("content-type", call.type);
     body = call.body;
   }
   try {
