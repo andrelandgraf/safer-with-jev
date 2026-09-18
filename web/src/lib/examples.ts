@@ -11,12 +11,11 @@ export type TextExample = {
   text: string;
 };
 
-export const ASK_CODE_EXAMPLES: AskExample[] = [
-  {
-    id: "good-code",
-    label: "Is this good code?",
-    q: "Is this good code?",
-    t: `type Customer = { id: string; name: string; plan?: "free" | "pro" };
+export const ASK_CODE_EXAMPLE: AskExample = {
+  id: "good-code",
+  label: "Is this good code?",
+  q: "Is this good code?",
+  t: `type Customer = { id: string; name: string; plan?: "free" | "pro" };
 
 function getCustomer(row: unknown, fallback?: Customer | null) {
   const data = (row as any as Customer) ?? {};
@@ -49,14 +48,7 @@ function getCustomer(row: unknown, fallback?: Customer | null) {
     meta: ((data as any).meta ?? nested.meta ?? {}) as any as Customer,
   } as any as Customer;
 }`,
-  },
-  {
-    id: "code",
-    label: "1 + 2",
-    q: "Does this JavaScript expression evaluate to 3?",
-    t: "1 + 2",
-  },
-];
+};
 
 export const ASK_SLOP_EXAMPLES: AskExample[] = [
   {
