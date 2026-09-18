@@ -195,24 +195,6 @@ ul.index {
   display: none;
 }
 
-button.hed {
-  display: inline;
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-style: italic;
-  font-size: 1.12rem;
-  color: inherit;
-  cursor: pointer;
-  text-align: left;
-}
-
-button.hed:hover:not(:disabled) {
-  color: var(--accent);
-}
-
-button.hed:disabled,
 button.chip:disabled {
   opacity: 0.45;
   cursor: wait;
@@ -236,7 +218,6 @@ button.chip:hover:not(:disabled) {
   color: var(--bg);
 }
 
-button.hed:focus-visible,
 button.chip:focus-visible,
 button[type="submit"]:focus-visible,
 input:focus-visible,
