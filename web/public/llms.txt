@@ -5,13 +5,13 @@
 ## Documentation
 
 - [API documentation](https://safer-with-jev.com/AGENTS.md): Request formats, responses, limits and forwarding behavior.
-- [Interactive showcases](https://safer-with-jev.com/): Human-facing examples.
+- [Newspaper landing](https://safer-with-jev.com/): Human-facing examples.
 
 ## API
 
 - [API host](https://api.safer-with-jev.com/): Send inspect and forwarding requests here.
 
-The site host serves HTML showcases. The API host serves JSON and forwarding responses.
+The site host serves the newspaper landing. The API host serves JSON and forwarding responses.
 Inspection requires no Safer API key.
 GET /ask-jev uses q and t. GET /nice-try uses p.
 POST /block-prompt-injections and /block-unsafe-replies accept text.

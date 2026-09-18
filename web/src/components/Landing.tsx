@@ -91,8 +91,6 @@ export function Landing() {
         defaultExample={ASK_CODE_DEFAULT}
         curl={ASK_CODE_CURL}
         idPrefix="landing-code"
-        openHref={`/ask-jev?q=${encodeURIComponent(ASK_CODE_DEFAULT.q)}&t=${encodeURIComponent(ASK_CODE_DEFAULT.t)}`}
-        openLabel="Open the Ask Jev about code showcase"
         rows={16}
       />
       <AskStory
@@ -103,8 +101,6 @@ export function Landing() {
         defaultExample={ASK_SLOP_DEFAULT}
         curl={ASK_SLOP_CURL}
         idPrefix="landing-slop"
-        openHref={`/ask-jev?q=${encodeURIComponent(ASK_SLOP_DEFAULT.q)}&t=${encodeURIComponent(ASK_SLOP_DEFAULT.t)}`}
-        openLabel="Open the AI slop showcase"
       />
       <NiceStory />
       <CommentStory />
@@ -122,8 +118,6 @@ function AskStory({
   defaultExample,
   curl,
   idPrefix,
-  openHref,
-  openLabel,
   rows = 4,
 }: {
   title: string;
@@ -133,8 +127,6 @@ function AskStory({
   defaultExample: AskExample;
   curl: string;
   idPrefix: string;
-  openHref: string;
-  openLabel: string;
   rows?: number;
 }) {
   const inspect = useInspectCall();
@@ -182,22 +174,21 @@ function AskStory({
           ))}
         </ul>
       ) : null}
-      <p className="demo-more">
-        {chips.map((example) => (
-          <button
-            key={example.id}
-            type="button"
-            className="chip"
-            disabled={pending}
-            onClick={() => load(example)}
-          >
-            {example.label}
-          </button>
-        ))}
-        <a className="demo-open" href={openHref}>
-          {openLabel}
-        </a>
-      </p>
+      {chips.length > 0 ? (
+        <p className="demo-more">
+          {chips.map((example) => (
+            <button
+              key={example.id}
+              type="button"
+              className="chip"
+              disabled={pending}
+              onClick={() => load(example)}
+            >
+              {example.label}
+            </button>
+          ))}
+        </p>
+      ) : null}
       <form onSubmit={submit}>
         <label htmlFor={questionId}>Question</label>
         <input
@@ -282,9 +273,6 @@ function NiceStory() {
             {example.label}
           </button>
         ))}
-        <a className="demo-open" href="/nice-try">
-          Open the prompt injection scan
-        </a>
       </p>
       <form onSubmit={submit}>
         <label htmlFor="landing-nice-p">Untrusted prompt</label>
@@ -321,7 +309,6 @@ function CommentStory() {
   const [text, setText] = useState(COMMENT_DEFAULT.text);
   const [error, setError] = useState<string | null>(null);
   const pending = inspect.state.kind === "pending";
-  const openHref = `/ask-jev?q=${encodeURIComponent(COMMENT_QUESTION)}&t=${encodeURIComponent(COMMENT_DEFAULT.text)}`;
 
   function load(example: (typeof COMMENT_EXAMPLES)[number]) {
     setError(null);
@@ -361,9 +348,6 @@ function CommentStory() {
             {example.label}
           </button>
         ))}
-        <a className="demo-open" href={openHref}>
-          Open the comment showcase
-        </a>
       </p>
       <form onSubmit={submit}>
         <label htmlFor="landing-comment-t">Comment</label>

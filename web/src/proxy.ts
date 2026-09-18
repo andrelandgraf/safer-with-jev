@@ -3,13 +3,7 @@ import { readAgentsMarkdown } from "@/lib/agents-file";
 import { negotiateAccept } from "@/lib/accept";
 
 export const config = {
-  matcher: [
-    "/",
-    "/ask-jev",
-    "/nice-try",
-    "/block-prompt-injections",
-    "/block-unsafe-replies",
-  ],
+  matcher: ["/"],
 };
 
 function documentation(kind: "markdown" | "plain", request: NextRequest): Response {

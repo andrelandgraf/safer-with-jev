@@ -218,8 +218,7 @@ button.chip:disabled {
   cursor: wait;
 }
 
-button.chip,
-a.demo-open {
+button.chip {
   display: inline-block;
   padding: 0.28rem 0.7rem 0.32rem;
   border: 1px solid var(--fg);
@@ -232,15 +231,13 @@ a.demo-open {
   cursor: pointer;
 }
 
-button.chip:hover:not(:disabled),
-a.demo-open:hover {
+button.chip:hover:not(:disabled) {
   background: var(--fg);
   color: var(--bg);
 }
 
 button.hed:focus-visible,
 button.chip:focus-visible,
-a.demo-open:focus-visible,
 button[type="submit"]:focus-visible,
 input:focus-visible,
 textarea:focus-visible {

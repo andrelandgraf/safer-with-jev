@@ -68,47 +68,17 @@ if ((await legacySiteFile.text()) !== agentsBytes) {
   throw new Error("/SITE.md and /AGENTS.md differ");
 }
 
-const sharePaths = [
+const gonePaths = [
   "/ask-jev",
   "/nice-try",
   "/block-prompt-injections",
   "/block-unsafe-replies",
 ] as const;
-for (const path of sharePaths) {
-  const share = await fetch(`${siteUrl}${path}`);
-  if (share.status !== 200) {
-    throw new Error(`expected 200 on ${path}, got ${share.status}`);
+for (const path of gonePaths) {
+  const gone = await fetch(`${siteUrl}${path}`);
+  if (gone.status !== 404) {
+    throw new Error(`expected 404 on ${path}, got ${gone.status}`);
   }
-  const shareType = share.headers.get("content-type") ?? "";
-  if (!shareType.includes("text/html")) {
-    throw new Error(`expected HTML on ${path}, got ${shareType}`);
-  }
-  const shareHtml = await share.text();
-  if (!shareHtml.includes(`/og${path}.png`)) {
-    throw new Error(`${path} is missing share image`);
-  }
-  const card = await fetch(`${siteUrl}/og${path}.png`);
-  if (card.status !== 200 || !(card.headers.get("content-type") ?? "").includes("image/png")) {
-    throw new Error(`expected PNG on /og${path}.png, got ${card.status}`);
-  }
-}
-
-const inspectGet = await fetch(
-  `${siteUrl}/ask-jev?q=${encodeURIComponent("Is this good text?")}&t=${encodeURIComponent("The train arrives at noon.")}`,
-);
-if (inspectGet.status !== 200) {
-  throw new Error(`expected 200 HTML demo on site ask-jev query, got ${inspectGet.status}`);
-}
-if (!(inspectGet.headers.get("content-type") ?? "").includes("text/html")) {
-  throw new Error("apex ask-jev with query must stay HTML");
-}
-
-const unfurl = await fetch(
-  `${siteUrl}/ask-jev?q=${encodeURIComponent("Is this good text?")}&t=${encodeURIComponent("The train arrives at noon.")}`,
-  { headers: { "user-agent": "Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)" } },
-);
-if (unfurl.status !== 200 || !(unfurl.headers.get("content-type") ?? "").includes("text/html")) {
-  throw new Error("expected HTML for Slack unfurl on /ask-jev");
 }
 
 for (const path of ["/robots.txt", "/sitemap.xml", "/llms.txt", "/favicon.svg"]) {

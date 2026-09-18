@@ -25,6 +25,12 @@ describe("web/content/AGENTS.md", () => {
     expect(agentsFile).not.toContain("pathetic loser");
   });
 
+  test("does not link to site HTML breakout pages", () => {
+    expect(agentsFile).not.toContain("https://safer-with-jev.com/ask-jev");
+    expect(agentsFile).not.toContain("https://safer-with-jev.com/nice-try");
+    expect(agentsFile).not.toContain("https://safer-with-jev.com/block-");
+  });
+
   test("lists image captioning as a use case without a live route", () => {
     expect(agentsFile).toContain("generate a caption");
     expect(agentsFile).not.toContain("/block-unsafe-images");
@@ -68,8 +74,8 @@ describe("homepage", () => {
     expect(html).toContain("<ul>");
     expect(html).toContain("<li>");
     expect(html).toContain("block-prompt-injections");
-    expect(html).toContain("/nice-try?p=");
-    expect(html).toContain("/ask-jev?");
+    expect(html).toContain("/nice-try");
+    expect(html).toContain("/ask-jev");
     expect(html).toContain("<!doctype html>");
     expect(renderHomepage(AGENTS_MARKDOWN)).toBe(html);
   });

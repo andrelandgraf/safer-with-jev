@@ -15,12 +15,8 @@ GET  https://safer-with-jev.com/                         HTML newspaper
 GET  https://safer-with-jev.com/  Accept: text/markdown   AGENTS.md bytes
 GET  https://safer-with-jev.com/AGENTS.md                 AGENTS.md bytes
 GET  https://safer-with-jev.com/SITE.md                   same bytes as AGENTS.md
-GET  https://safer-with-jev.com/ask-jev                  interactive demo
 GET  https://api.safer-with-jev.com/ask-jev?q=&t=        open yes/no Noul over text
-GET  https://safer-with-jev.com/nice-try                 interactive demo
 GET  https://api.safer-with-jev.com/nice-try?p=<text>    prompt-injection inspect
-GET  https://safer-with-jev.com/block-prompt-injections  interactive demo
-GET  https://safer-with-jev.com/block-unsafe-replies     interactive demo
 POST https://api.safer-with-jev.com/block-prompt-injections
 POST https://api.safer-with-jev.com/block-unsafe-replies
 PUT  https://api.safer-with-jev.com/block-prompt-injections
@@ -31,7 +27,7 @@ No Safer key. Inspect ignores `Authorization`, including dummy bearers. TypeSafe
 
 Omit `target` to inspect. Add it to forward only after `action=pass`. Review and block never forward. Every forward uses the caller's URL and credentials. There is no hosted model or PUT default: that would be an open paid proxy.
 
-GET `/nice-try` without `p`, GET `/ask-jev` without both `q` and `t`, and GET `/block-*` on the **site** host return a newsprint demo with Open Graph tags. Slackbot and other unfurl crawlers get that HTML. JSON inspect lives on `api.safer-with-jev.com`: `/nice-try` is inspect-only (`p`, no body, no `target`); `/ask-jev` is inspect-only (`q` yes/no, `t` the text). Ask JSON is `{ noul, jevMs }` — P(yes) and the Jev call duration in milliseconds, not the Safer pass/review/block policy.
+GET `/nice-try` without `p` and GET `/ask-jev` without both `q` and `t` return JSON errors on the API host. The site host is the newspaper landing at `/`. JSON inspect lives on `api.safer-with-jev.com`: `/nice-try` is inspect-only (`p`, no body, no `target`); `/ask-jev` is inspect-only (`q` yes/no, `t` the text). Ask JSON is `{ noul, jevMs }` — P(yes) and the Jev call duration in milliseconds, not the Safer pass/review/block policy.
 
 ```text
 No target            → 200  judgment JSON

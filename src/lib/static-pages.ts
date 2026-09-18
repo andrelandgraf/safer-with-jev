@@ -1,6 +1,5 @@
 import { SITE_ORIGIN } from "./homepage";
-import { OG_PNG, SHARE_OG_PNG } from "./og-png";
-import { isShareSlug, SHARE_SLUGS } from "./share-pages";
+import { OG_PNG } from "./og-png";
 
 const STATIC_CACHE = "public, max-age=86400";
 
@@ -28,19 +27,6 @@ export function ogPngResponse(): Response {
   });
 }
 
-export function shareOgPngResponse(file: string): Response | null {
-  if (!file.endsWith(".png")) {
-    return null;
-  }
-  const slug = file.slice(0, -".png".length);
-  if (!isShareSlug(slug)) {
-    return null;
-  }
-  return new Response(pngBody(SHARE_OG_PNG[slug]), {
-    headers: PNG_HEADERS,
-  });
-}
-
 export function faviconResponse(): Response {
   return new Response(FAVICON_SVG, {
     headers: {
@@ -51,16 +37,8 @@ export function faviconResponse(): Response {
 }
 
 export function robotsResponse(): Response {
-  const allows = [
-    "/",
-    "/og.png",
-    "/og/",
-    "/favicon.svg",
-    "/sitemap.xml",
-    ...SHARE_SLUGS.map((slug) => `/${slug}`),
-  ];
   const body = `User-agent: *
-${allows.map((path) => `Allow: ${path}`).join("\n")}
+Allow: /
 
 Sitemap: ${SITE_ORIGIN}/sitemap.xml
 `;
@@ -73,17 +51,11 @@ Sitemap: ${SITE_ORIGIN}/sitemap.xml
 }
 
 export function sitemapResponse(): Response {
-  const locs = ["/", ...SHARE_SLUGS.map((slug) => `/${slug}`)];
-  const urls = locs
-    .map(
-      (path) => `  <url>
-    <loc>${SITE_ORIGIN}${path === "/" ? "/" : path}</loc>
-  </url>`,
-    )
-    .join("\n");
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls}
+  <url>
+    <loc>${SITE_ORIGIN}/</loc>
+  </url>
 </urlset>
 `;
   return new Response(body, {

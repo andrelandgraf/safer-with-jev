@@ -1,13 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { OG_PNG, SHARE_OG_PNG } from "./og-png";
-import { SHARE_SLUGS } from "./share-pages";
-import {
-  faviconResponse,
-  ogPngResponse,
-  robotsResponse,
-  shareOgPngResponse,
-  sitemapResponse,
-} from "./static-pages";
+import { OG_PNG } from "./og-png";
+import { faviconResponse, ogPngResponse, robotsResponse, sitemapResponse } from "./static-pages";
 
 describe("og png", () => {
   test("is a PNG", () => {
@@ -20,21 +13,6 @@ describe("og png", () => {
     const bytes = Buffer.from(await response.arrayBuffer());
     expect(bytes.equals(OG_PNG)).toBe(true);
   });
-
-  test("GET /og/<slug>.png serves each route card", async () => {
-    for (const slug of SHARE_SLUGS) {
-      const response = shareOgPngResponse(`${slug}.png`);
-      expect(response).not.toBeNull();
-      if (!response) {
-        continue;
-      }
-      expect(response.headers.get("content-type")).toBe("image/png");
-      const bytes = Buffer.from(await response.arrayBuffer());
-      expect(bytes.equals(SHARE_OG_PNG[slug])).toBe(true);
-    }
-    expect(shareOgPngResponse("nope.png")).toBeNull();
-    expect(shareOgPngResponse("ask-jev")).toBeNull();
-  });
 });
 
 describe("static pages", () => {
@@ -44,20 +22,18 @@ describe("static pages", () => {
     expect(await response.text()).toContain("<svg");
   });
 
-  test("robots points at the sitemap and allows share paths", async () => {
+  test("robots points at the sitemap", async () => {
     const body = await robotsResponse().text();
     expect(body).toContain("Sitemap: https://safer-with-jev.com/sitemap.xml");
-    expect(body).toContain("Allow: /ask-jev");
-    expect(body).toContain("Allow: /nice-try");
-    expect(body).toContain("Allow: /block-prompt-injections");
+    expect(body).toContain("Allow: /");
+    expect(body).not.toContain("Allow: /ask-jev");
     expect(body).not.toContain("Disallow:");
   });
 
-  test("sitemap lists the homepage and share paths", async () => {
+  test("sitemap lists the homepage only", async () => {
     const body = await sitemapResponse().text();
     expect(body).toContain("<loc>https://safer-with-jev.com/</loc>");
-    expect(body).toContain("<loc>https://safer-with-jev.com/ask-jev</loc>");
-    expect(body).toContain("<loc>https://safer-with-jev.com/block-unsafe-replies</loc>");
-    expect(body).not.toContain("block-unsafe-images");
+    expect(body).not.toContain("ask-jev");
+    expect(body).not.toContain("block-unsafe");
   });
 });

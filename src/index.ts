@@ -10,13 +10,11 @@ import { createLimiter } from "./lib/limiter";
 import { STAGE_MS } from "./lib/limits";
 import { servesLegacySite } from "./lib/request-host";
 import { CORS_EXPOSE } from "./lib/response";
-import { sharePageForRequest } from "./lib/share-pages";
 import { AGENTS_MARKDOWN } from "./lib/agents-markdown";
 import {
   faviconResponse,
   ogPngResponse,
   robotsResponse,
-  shareOgPngResponse,
   sitemapResponse,
 } from "./lib/static-pages";
 
@@ -96,27 +94,11 @@ function agentsMarkdownResponse(): Response {
 app.get("/AGENTS.md", () => agentsMarkdownResponse());
 app.get("/SITE.md", () => agentsMarkdownResponse());
 app.get("/og.png", (c) => (servesLegacySite(c.req.raw) ? ogPngResponse() : notFound()));
-app.get("/og/:file", (c) => {
-  if (!servesLegacySite(c.req.raw)) {
-    return notFound();
-  }
-  const response = shareOgPngResponse(c.req.param("file"));
-  if (!response) {
-    return notFound();
-  }
-  return response;
-});
 app.get("/favicon.svg", (c) => (servesLegacySite(c.req.raw) ? faviconResponse() : notFound()));
 app.get("/robots.txt", (c) => (servesLegacySite(c.req.raw) ? robotsResponse() : notFound()));
 app.get("/sitemap.xml", (c) => (servesLegacySite(c.req.raw) ? sitemapResponse() : notFound()));
 
 app.all("*", (c) => {
-  if (servesLegacySite(c.req.raw)) {
-    const share = sharePageForRequest(c.req.raw);
-    if (share) {
-      return share;
-    }
-  }
   return handleSaferRequest(c.req.raw, {
     typesafe,
     limiter,

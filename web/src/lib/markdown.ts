@@ -101,32 +101,3 @@ export function parseMarkdown(markdown: string): Block[] {
   return blocks;
 }
 
-export type ChipTarget =
-  | { kind: "ask"; q: string; t: string }
-  | { kind: "nice-try"; p: string };
-
-export function chipTargetFromHref(href: string): ChipTarget | null {
-  let url: URL;
-  try {
-    url = new URL(href, "https://safer-with-jev.com");
-  } catch {
-    return null;
-  }
-  if (url.hostname !== "safer-with-jev.com") {
-    return null;
-  }
-  if (url.pathname === "/ask-jev") {
-    const q = url.searchParams.get("q");
-    const t = url.searchParams.get("t");
-    if (q && t) {
-      return { kind: "ask", q, t };
-    }
-  }
-  if (url.pathname === "/nice-try") {
-    const p = url.searchParams.get("p");
-    if (p) {
-      return { kind: "nice-try", p };
-    }
-  }
-  return null;
-}
