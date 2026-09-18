@@ -26,7 +26,7 @@ Omit `target` to inspect. Add it to forward only after `action=pass`. Review and
 
 GET `/nice-try` is inspect-only. The untrusted user turn is `p`. No body. No `target`.
 
-GET `/ask-jev` is inspect-only. `q` is a yes/no question. `t` is the text being judged. Response is `{ question, text, noul, type: "noul" }` — P(yes), not the Safer pass/review/block policy.
+GET `/ask-jev` is inspect-only. `q` is a yes/no question. `t` is the text being judged. Response is `{ noul, jevMs }` — P(yes) and the Jev call duration in milliseconds, not the Safer pass/review/block policy.
 
 ```text
 No target            → 200  judgment JSON
@@ -267,35 +267,34 @@ Inspect, always `200`:
 {
   "allow": false,
   "action": "block",
-  "nouls": {
-    "instruction_override": 0.97,
-    "instruction_disclosure": 0.82
-  },
-  "severity": 2.4,
-  "policy": "demo-v1",
-  "basis": "text"
+  "jevMs": 45
 }
 ```
+
+`GET /ask-jev` `200`:
+
+```json
+{
+  "noul": 0.98,
+  "jevMs": 45
+}
+```
+
+`jevMs` is the Jev call duration in integer milliseconds. Nouls, severity, policy, and basis stay internal.
 
 Model pass: **upstream status and body unchanged**. Judgment lives in headers so OpenAI SDKs keep parsing completions. Do not forward `Location` or `Set-Cookie`. Do not overwrite Safer's judgment/timing headers.
 
 ```http
 x-neon-allow: true
 x-neon-action: pass
-x-neon-nouls: instruction_override=0.02,instruction_disclosure=0.01
-x-neon-severity: 0.1
-x-neon-policy: demo-v1
-x-neon-basis: text
-x-neon-destination-name: chat-completions
-x-neon-destination-target: https://api.openai.com/<redacted>
-x-neon-destination-status: 200
+x-neon-jev-ms: 45
 ```
 
-PUT pass: `200` judgment JSON plus `destination` (upstream may be `200` or `204`). Do not echo storage bodies or signed URLs.
+PUT pass: `200` with `{ allow, action, jevMs }` (upstream may be `200` or `204`). Do not echo storage bodies or signed URLs.
 
-Proxy deny: `403` with OpenAI-shaped `error` (`guardrail_blocked` / `guardrail_review_required`), judgment, and `destination.status: "not_attempted"`.
+Proxy deny: `403` with `{ allow, action, jevMs }`. `action` is `review` or `block`.
 
-`allow` is the guard result, not destination success. After a pass, a model 4xx/5xx is forwarded as-is with passing judgment headers. A PUT failure is `502` with `allow: true`. A timeout after dispatch may have committed; return `504` and `status: "unknown"` (or the header status if headers already arrived). No rollback claim.
+`allow` is the guard result, not destination success. After a pass, a model 4xx/5xx is forwarded as-is with passing judgment headers. A PUT failure is `502`. A timeout after dispatch may have committed; return `504`. No rollback claim.
 
 | Code | When |
 |---|---|
@@ -349,15 +348,11 @@ v1 JSON: non-streaming, self-contained, text-only Chat Completions or Responses,
 ## Timing
 
 ```http
-x-neon-vision-ms: 620
 x-neon-jev-ms: 45
-x-neon-proxy-ms: 80
-x-neon-total-ms: 753
-Server-Timing: vision;dur=620, jev;dur=45, proxy;dur=80, total;dur=753
 Cache-Control: no-store
 ```
 
-Unattempted stages are `0`. Omit `vision` on text routes. Failed stages report elapsed work. `proxy` includes full body consumption (unlike `typesafe-on-neon`, which stops at response headers). CORS exposes all documented timing, judgment, destination, and request-id headers.
+Inspect and deny put `jevMs` in the JSON body as well. Unattempted Jev is `0`. Failed Jev reports elapsed work. CORS exposes `x-neon-allow`, `x-neon-action`, `x-neon-jev-ms`, and `x-neon-request-id`.
 
 | Limit | Value |
 |---|---:|
@@ -413,7 +408,7 @@ Live, local and deployed, real Jev:
 - Review is `allow: false` and does not dispatch
 - BYO model pass/block/review on OpenAI and Groq via POST `/block-prompt-injections?target=`. PUT on S3, R2, and Neon Object Storage presigns before listing them
 - Controlled origin: exact body hash, exact path/query, forwarded org/idempotency/custom headers, no cookies, origin `Host`, no hop-by-hop
-- Forwarding client: `fetch` (or curl) to `/block-prompt-injections`; success JSON has no injected guard fields; `403` body is the OpenAI-shaped error. `/v1/chat/completions` and `/v1/responses` on Safer are `404`.
+- Forwarding client: `fetch` (or curl) to `/block-prompt-injections`; success JSON has no injected guard fields; `403` body is `{ allow, action, jevMs }`. `/v1/chat/completions` and `/v1/responses` on Safer are `404`.
 - Missing target/bearer is `400` before Jev. Passing judgment + bad upstream key returns the upstream `401`, no fallback
 - Destinations never receive the TypeSafe key or inbound cookies. Caption Gateway calls are a separate, budgeted path
 - Query redacted in application and host logs

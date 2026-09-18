@@ -20,11 +20,12 @@ import { destinationName, isImageRoute, isReplyRoute, parseRouting } from "./rou
 import { parseReplyBody } from "./replies";
 import {
   applyJudgmentHeaders,
+  askBody,
   denyResponse,
   destinationFrom,
   errorResponse,
+  inspectBody,
   jsonResponse,
-  judgmentJson,
   type Destination,
 } from "./response";
 import { applyTimingHeaders } from "./timing";
@@ -104,12 +105,7 @@ export async function handleSaferRequest(request: Request, deps: SaferDeps): Pro
       });
       return jsonResponse({
         status: 200,
-        body: {
-          question: routing.question,
-          text: routing.text,
-          noul: noulValue,
-          type: "noul",
-        },
+        body: askBody(noulValue, jevMs),
         timings: timings(),
         requestId,
       });
@@ -213,8 +209,7 @@ export async function handleSaferRequest(request: Request, deps: SaferDeps): Pro
     if (routing.kind === "inspect") {
       return jsonResponse({
         status: 200,
-        body: judgmentJson(judgment, undefined),
-        judgment,
+        body: inspectBody(judgment, jevMs),
         timings: timings(),
         requestId,
       });
@@ -223,7 +218,6 @@ export async function handleSaferRequest(request: Request, deps: SaferDeps): Pro
     if (!judgment.allow || !destination) {
       return denyResponse({
         judgment,
-        destination: destination ?? { name: destName ?? "put", target: "unknown", status: "not_attempted" },
         timings: timings(),
         requestId,
       });
@@ -270,19 +264,14 @@ export async function handleSaferRequest(request: Request, deps: SaferDeps): Pro
               param: null,
               stage: "destination",
             },
-            ...judgmentJson(judgment, destination),
           },
-          judgment,
-          destination,
           timings: timings(),
           requestId,
         });
       }
       return jsonResponse({
         status: 200,
-        body: judgmentJson(judgment, destination),
-        judgment,
-        destination,
+        body: inspectBody(judgment, jevMs),
         timings: timings(),
         requestId,
       });
@@ -290,7 +279,7 @@ export async function handleSaferRequest(request: Request, deps: SaferDeps): Pro
 
     const headers = filterUpstreamResponseHeaders(upstream.headers);
     headers.set("cache-control", "no-store");
-    applyJudgmentHeaders(headers, judgment, destination, requestId);
+    applyJudgmentHeaders(headers, judgment, requestId);
     applyTimingHeaders(headers, timings());
     return new Response(Buffer.from(upstream.body), { status: upstream.status, headers });
   } catch (error) {
@@ -323,9 +312,7 @@ export async function handleSaferRequest(request: Request, deps: SaferDeps): Pro
             param: null,
             stage: http.stage,
           },
-          destination,
         },
-        destination,
         timings: timings(),
         requestId,
       });

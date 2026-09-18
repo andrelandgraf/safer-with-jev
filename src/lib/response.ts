@@ -1,7 +1,7 @@
 import { errorPayload, type HttpError } from "./http-error";
-import { applyTimingHeaders, type SaferTimings } from "./timing";
+import { applyTimingHeaders, roundMs, type SaferTimings } from "./timing";
 import type { DestinationName } from "./routing";
-import type { Judgment } from "./policy";
+import type { Judgment, JudgmentAction } from "./policy";
 import { redactTarget } from "./ssrf";
 
 export type Destination = {
@@ -10,64 +10,48 @@ export type Destination = {
   status: number | "not_attempted" | "unknown";
 };
 
+export type InspectBody = {
+  allow: boolean;
+  action: JudgmentAction;
+  jevMs: number;
+};
+
+export type AskBody = {
+  noul: number;
+  jevMs: number;
+};
+
 export const CORS_EXPOSE = [
   "x-neon-allow",
   "x-neon-action",
-  "x-neon-nouls",
-  "x-neon-severity",
-  "x-neon-policy",
-  "x-neon-basis",
-  "x-neon-destination-name",
-  "x-neon-destination-target",
-  "x-neon-destination-status",
-  "x-neon-vision-ms",
   "x-neon-jev-ms",
-  "x-neon-proxy-ms",
-  "x-neon-total-ms",
   "x-neon-request-id",
-  "Server-Timing",
 ] as const;
 
-export function applyJudgmentHeaders(
-  headers: Headers,
-  judgment: Judgment,
-  destination: Destination | undefined,
-  requestId: string,
-): void {
-  headers.set("x-neon-allow", String(judgment.allow));
-  headers.set("x-neon-action", judgment.action);
-  headers.set(
-    "x-neon-nouls",
-    Object.entries(judgment.nouls)
-      .map(([name, value]) => `${name}=${value}`)
-      .join(","),
-  );
-  headers.set("x-neon-severity", String(judgment.severity));
-  headers.set("x-neon-policy", judgment.policy);
-  headers.set("x-neon-basis", judgment.basis);
-  headers.set("x-neon-request-id", requestId);
-  if (destination) {
-    headers.set("x-neon-destination-name", destination.name);
-    headers.set("x-neon-destination-target", destination.target);
-    headers.set("x-neon-destination-status", String(destination.status));
-  }
+export function inspectBody(judgment: Judgment, jevMs: number): InspectBody {
+  return {
+    allow: judgment.allow,
+    action: judgment.action,
+    jevMs: roundMs(jevMs),
+  };
 }
 
-export function judgmentJson(
-  judgment: Judgment,
-  destination: Destination | undefined,
-): Record<string, unknown> {
-  if (!destination) {
-    return judgment;
-  }
-  return { ...judgment, destination };
+export function askBody(noul: number, jevMs: number): AskBody {
+  return {
+    noul,
+    jevMs: roundMs(jevMs),
+  };
+}
+
+export function applyJudgmentHeaders(headers: Headers, judgment: Judgment, requestId: string): void {
+  headers.set("x-neon-allow", String(judgment.allow));
+  headers.set("x-neon-action", judgment.action);
+  headers.set("x-neon-request-id", requestId);
 }
 
 export function jsonResponse(input: {
   status: number;
   body: unknown;
-  judgment?: Judgment;
-  destination?: Destination;
   timings: SaferTimings;
   requestId: string;
   retryAfter?: number;
@@ -76,11 +60,7 @@ export function jsonResponse(input: {
     "content-type": "application/json",
     "cache-control": "no-store",
   });
-  if (input.judgment) {
-    applyJudgmentHeaders(headers, input.judgment, input.destination, input.requestId);
-  } else {
-    headers.set("x-neon-request-id", input.requestId);
-  }
+  headers.set("x-neon-request-id", input.requestId);
   applyTimingHeaders(headers, input.timings);
   if (input.retryAfter !== undefined) {
     headers.set("Retry-After", String(input.retryAfter));
@@ -105,29 +85,12 @@ export function errorResponse(input: {
 
 export function denyResponse(input: {
   judgment: Judgment;
-  destination: Destination;
   timings: SaferTimings;
   requestId: string;
 }): Response {
-  const code = input.judgment.action === "block" ? "guardrail_blocked" : "guardrail_review_required";
-  const message =
-    input.judgment.action === "block"
-      ? "Request blocked by Safer with Jev."
-      : "Request requires review; forwarding is refused.";
   return jsonResponse({
     status: 403,
-    body: {
-      error: {
-        message,
-        type: "permission_error",
-        code,
-        param: null,
-        stage: "jev",
-      },
-      ...judgmentJson(input.judgment, input.destination),
-    },
-    judgment: input.judgment,
-    destination: input.destination,
+    body: inspectBody(input.judgment, input.timings.jevMs),
     timings: input.timings,
     requestId: input.requestId,
   });

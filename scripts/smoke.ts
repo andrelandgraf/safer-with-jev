@@ -53,7 +53,14 @@ if (inspect.status !== 200) {
   throw new Error(`inspect failed: ${inspect.status} ${await inspect.text()}`);
 }
 const judgment = await readJson(inspect);
-if (!isRecord(judgment) || typeof judgment.allow !== "boolean" || judgment.policy !== "demo-v1") {
+if (
+  !isRecord(judgment) ||
+  typeof judgment.allow !== "boolean" ||
+  (judgment.action !== "pass" && judgment.action !== "review" && judgment.action !== "block") ||
+  typeof judgment.jevMs !== "number" ||
+  "nouls" in judgment ||
+  "policy" in judgment
+) {
   throw new Error("inspect returned an unexpected body");
 }
 if (inspect.headers.get("x-neon-jev-ms") === null) {
@@ -67,7 +74,15 @@ if (demo.status !== 200) {
   throw new Error(`nice-try failed: ${demo.status} ${await demo.text()}`);
 }
 const demoJudgment = await readJson(demo);
-if (!isRecord(demoJudgment) || typeof demoJudgment.allow !== "boolean" || demoJudgment.policy !== "demo-v1") {
+if (
+  !isRecord(demoJudgment) ||
+  typeof demoJudgment.allow !== "boolean" ||
+  (demoJudgment.action !== "pass" &&
+    demoJudgment.action !== "review" &&
+    demoJudgment.action !== "block") ||
+  typeof demoJudgment.jevMs !== "number" ||
+  "nouls" in demoJudgment
+) {
   throw new Error("nice-try returned an unexpected body");
 }
 
@@ -80,11 +95,12 @@ if (ask.status !== 200) {
 const askBody = await readJson(ask);
 if (
   !isRecord(askBody) ||
-  askBody.type !== "noul" ||
   typeof askBody.noul !== "number" ||
   askBody.noul < 0 ||
   askBody.noul > 1 ||
-  askBody.question !== "Is this good text?"
+  typeof askBody.jevMs !== "number" ||
+  "type" in askBody ||
+  "question" in askBody
 ) {
   throw new Error("ask-jev returned an unexpected body");
 }
@@ -108,7 +124,7 @@ console.log(
       inspectAction: judgment.action,
       demoAction: demoJudgment.action,
       askNoul: askBody.noul,
-      jevMs: inspect.headers.get("x-neon-jev-ms"),
+      jevMs: judgment.jevMs,
     },
     null,
     2,
