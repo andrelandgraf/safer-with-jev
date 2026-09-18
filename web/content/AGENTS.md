@@ -118,7 +118,7 @@ Ask Jev whether a comment violates community policies against hate speech or har
 ```bash
 curl -i --get 'https://api.safer-with-jev.com/ask-jev' \
   --data-urlencode 'q=Does this comment violate community policies against hate speech or harassment?' \
-  --data-urlencode 't=Hey! Tech is amazing right now! Love all the amazing developments that are pushing the boundaries and our society forward!'
+  --data-urlencode 't=Loved the live demo today. The branching example finally made it click.'
 ```
 
 ### Inspect a reply

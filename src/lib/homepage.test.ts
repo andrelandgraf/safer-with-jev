@@ -18,9 +18,9 @@ describe("web/content/AGENTS.md", () => {
     expect(agentsFile).not.toContain("nextjs-agent-rules");
   });
 
-  test("comment examples stay ordinary", () => {
+  test("comment curl example stays ordinary", () => {
     expect(agentsFile).toContain(
-      "Hey! Tech is amazing right now! Love all the amazing developments that are pushing the boundaries and our society forward!",
+      "Loved the live demo today. The branching example finally made it click.",
     );
     expect(agentsFile).not.toContain("pathetic loser");
   });
