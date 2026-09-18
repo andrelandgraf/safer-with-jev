@@ -81,15 +81,6 @@ main {
   margin: 0 auto;
   padding: 2.4rem 1.25rem 5.5rem;
 }
-.folio {
-  margin: 0 0 0.55rem;
-  text-align: center;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
 h1 {
   font-size: clamp(2.5rem, 8vw, 3.6rem);
   font-weight: 700;
@@ -207,7 +198,7 @@ main > p:last-child {
 </head>
 <body>
 <main class="${page.mainClass}">
-${page.mainClass === "site" ? `<p class="folio">Vol. 1 · No. 1 · Mountain View, Calif.</p>\n` : ""}${page.bodyHtml}
+${page.bodyHtml}
 </main>
 </body>
 </html>

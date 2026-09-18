@@ -37,16 +37,6 @@ main {
   padding: 2.4rem 1.25rem 5.5rem;
 }
 
-.folio {
-  margin: 0 0 0.55rem;
-  text-align: center;
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
 h1 {
   font-size: clamp(2.5rem, 8vw, 3.6rem);
   font-weight: 700;

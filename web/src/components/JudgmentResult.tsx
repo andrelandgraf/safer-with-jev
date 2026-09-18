@@ -49,13 +49,15 @@ function timings(roundtripMs: number, jevMs: number, image: boolean) {
 export function JudgmentResult({
   state,
   image = false,
+  scroll = true,
 }: {
   state: ResultState;
   image?: boolean;
+  scroll?: boolean;
 }) {
   const anchor = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (state.kind === "idle") {
+    if (!scroll || state.kind === "idle") {
       return;
     }
     const node = anchor.current;
@@ -64,7 +66,7 @@ export function JudgmentResult({
     }
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     node.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
-  }, [state.kind]);
+  }, [scroll, state.kind]);
   if (state.kind === "idle") {
     return null;
   }
