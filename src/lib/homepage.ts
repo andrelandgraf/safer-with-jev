@@ -3,13 +3,12 @@ import { escapeHtml, markdownToHtml } from "./markdown";
 export const SITE_ORIGIN = "https://safer-with-jev.com";
 
 export const SITE_META = {
-  title: "Safer with Jev | Check before you forward",
-  description:
-    "An HTTP gate that checks prompts, images and replies with TypeSafe Jev and forwards only requests that pass.",
-  ogTitle: "Safer with Jev | Check before you forward",
-  ogDescription:
-    "Check prompts, images and replies with TypeSafe Jev before forwarding them to your endpoint.",
-  ogImageAlt: "Safer with Jev. Check before you forward.",
+  title: "Safer with Jev",
+  description: "Route through Jev, because you'd rather be safe than sorry.",
+  ogTitle: "Safer with Jev",
+  ogDescription: "Route through Jev, because you'd rather be safe than sorry.",
+  ogImageAlt:
+    'Gray newsprint card with "Safer with Jev" above large serif text reading "Route through Jev. Rather safe than sorry."',
 } as const;
 
 const OG_IMAGE = `${SITE_ORIGIN}/og.png`;

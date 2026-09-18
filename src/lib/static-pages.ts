@@ -4,8 +4,9 @@ import { OG_PNG } from "./og-png";
 const STATIC_CACHE = "public, max-age=86400";
 
 const FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" fill="#0b0c0b"/>
-  <circle cx="16" cy="16" r="6.5" fill="#7cffb2"/>
+  <rect width="32" height="32" fill="#cfcbc4"/>
+  <rect x="5" y="5" width="22" height="22" fill="none" stroke="#171614" stroke-width="1.25"/>
+  <circle cx="16" cy="16" r="3.25" fill="#171614"/>
 </svg>
 `;
 
