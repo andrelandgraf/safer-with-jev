@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { AskDemo, ImageDemo, NiceTryDemo, PromptDemo, ReplyDemo } from "@/components/Demos";
 import { demoMetadata } from "@/lib/metadata";
-import { ASK_EXAMPLES, NICE_TRY_EXAMPLES } from "@/lib/examples";
+import { ASK_EXAMPLES, NICE_TRY_EXAMPLES, PROMPT_EXAMPLES, REPLY_EXAMPLES } from "@/lib/examples";
 import { prefillOrEmpty, singleQueryParam } from "@/lib/query";
 import { isShareSlug, SHARE_SLUGS, type ShareSlug } from "@/lib/site";
 
@@ -60,10 +60,10 @@ function Demo({
     return <NiceTryDemo initial={prefillOrEmpty(p, NICE_TRY_EXAMPLES[0]?.text ?? "")} />;
   }
   if (slug === "block-prompt-injections") {
-    return <PromptDemo initial="" />;
+    return <PromptDemo initial={PROMPT_EXAMPLES[0]?.text ?? ""} />;
   }
   if (slug === "block-unsafe-replies") {
-    return <ReplyDemo initial="" />;
+    return <ReplyDemo initial={REPLY_EXAMPLES[0]?.text ?? ""} />;
   }
   return <ImageDemo />;
 }

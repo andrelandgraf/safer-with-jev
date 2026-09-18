@@ -83,6 +83,14 @@ app.get("/", (c) => {
   }
   return apiInfoResponse();
 });
+app.get("/SITE.md", () =>
+  new Response(SITE_MARKDOWN, {
+    headers: {
+      "content-type": "text/markdown; charset=utf-8",
+      "cache-control": "public, max-age=120",
+    },
+  }),
+);
 app.get("/og.png", (c) => (servesLegacySite(c.req.raw) ? ogPngResponse() : notFound()));
 app.get("/og/:file", (c) => {
   if (!servesLegacySite(c.req.raw)) {

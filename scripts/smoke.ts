@@ -106,6 +106,11 @@ for (const path of ["/robots.txt", "/sitemap.xml", "/llms.txt", "/favicon.svg"])
   }
 }
 
+const apiDocs = await fetch(`${apiUrl}/SITE.md`);
+if (apiDocs.status !== 200 || !(apiDocs.headers.get("content-type") ?? "").includes("text/markdown")) {
+  throw new Error(`expected markdown on API /SITE.md, got ${apiDocs.status} ${apiDocs.headers.get("content-type")}`);
+}
+
 const apiRoot = await fetch(`${apiUrl}/`);
 if (apiRoot.status !== 200) {
   throw new Error(`expected 200 on API /, got ${apiRoot.status}`);
