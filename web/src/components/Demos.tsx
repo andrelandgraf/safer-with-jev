@@ -59,6 +59,7 @@ export function AskDemo({
             key={example.id}
             type="button"
             className="chip"
+            disabled={inspect.state.kind === "pending"}
             onClick={() => {
               inspect.invalidate();
               setRepeatError(false);
@@ -76,6 +77,7 @@ export function AskDemo({
           id="q"
           name="q"
           value={q}
+          disabled={inspect.state.kind === "pending"}
           onChange={(event) => {
             inspect.invalidate();
             setRepeatError(false);
@@ -88,6 +90,7 @@ export function AskDemo({
           name="t"
           rows={6}
           value={t}
+          disabled={inspect.state.kind === "pending"}
           onChange={(event) => {
             inspect.invalidate();
             setRepeatError(false);
@@ -95,7 +98,7 @@ export function AskDemo({
           }}
         />
         <button type="submit" disabled={inspect.state.kind === "pending" || repeatError}>
-          Ask Jev
+          {inspect.state.kind === "pending" ? "On the wire" : "Ask Jev"}
         </button>
       </form>
       <JudgmentResult state={inspect.state} />
@@ -163,6 +166,7 @@ function TextDemo({
             key={example.id}
             type="button"
             className="chip"
+            disabled={inspect.state.kind === "pending"}
             onClick={() => {
               inspect.invalidate();
               setSizeError(null);
@@ -180,6 +184,7 @@ function TextDemo({
           name="body"
           rows={8}
           value={text}
+          disabled={inspect.state.kind === "pending"}
           onChange={(event) => {
             inspect.invalidate();
             setSizeError(null);
@@ -188,7 +193,7 @@ function TextDemo({
         />
         {sizeError ? <p role="alert">{sizeError}</p> : null}
         <button type="submit" disabled={inspect.state.kind === "pending"}>
-          {submitLabel}
+          {inspect.state.kind === "pending" ? "On the wire" : submitLabel}
         </button>
       </form>
       <JudgmentResult state={inspect.state} />

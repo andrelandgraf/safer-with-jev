@@ -76,6 +76,6 @@ src/lib/         routing, SSRF, Jev, vision, limiter, pinned HTTPS
 web/             Next.js newspaper site
 scripts/smoke.ts live site + API check
 neon.ts          AI Gateway + Function env + custom domain
-SITE.md          homepage copy and agent markdown
+SITE.md          agent/API markdown at /SITE.md; Function HTML still renders it
 DESIGN.md        contract
 ```

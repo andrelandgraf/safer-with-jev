@@ -161,30 +161,48 @@ li::before {
   background: var(--fg);
 }
 
-main.site h2:has(+ ul) {
+main.site h2:has(+ ul.index) {
   margin-bottom: 0;
 }
 
-main.site h2 + ul {
+ul.index {
   margin-top: 0;
   padding: 0.15rem 0 0.2rem;
   border-bottom: 1px solid var(--fg);
 }
 
 @media (min-width: 40rem) {
-  main.site h2 + ul {
+  ul.index {
     columns: 2;
     column-gap: 1.75rem;
     column-rule: 1px solid color-mix(in srgb, var(--fg) 22%, transparent);
   }
 
-  main.site h2 + ul li + li {
+  ul.index li + li {
     border-top: none;
   }
 
-  main.site h2 + ul li {
+  ul.index li {
     break-inside: avoid;
   }
+}
+
+.story {
+  margin: 1.75rem 0 0;
+  padding-top: 1.15rem;
+  border-top: 1px solid var(--fg);
+}
+
+.story h3 {
+  margin-top: 0;
+}
+
+.story[aria-busy="true"] {
+  color: color-mix(in srgb, var(--fg) 82%, var(--bg));
+}
+
+.story[aria-busy="true"] details {
+  display: none;
 }
 
 button.hed {
@@ -200,8 +218,14 @@ button.hed {
   text-align: left;
 }
 
-button.hed:hover {
+button.hed:hover:not(:disabled) {
   color: var(--accent);
+}
+
+button.hed:disabled,
+button.chip:disabled {
+  opacity: 0.45;
+  cursor: wait;
 }
 
 button.chip,
@@ -218,7 +242,7 @@ a.demo-open {
   cursor: pointer;
 }
 
-button.chip:hover,
+button.chip:hover:not(:disabled),
 a.demo-open:hover {
   background: var(--fg);
   color: var(--bg);
@@ -295,6 +319,57 @@ button[type="submit"]:disabled {
   margin-top: 1.4rem;
   padding-top: 0.85rem;
   border-top: 1px solid var(--fg);
+}
+
+.result.is-pending .result-label {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+  font-size: 1.45rem;
+  letter-spacing: 0;
+}
+
+.wire {
+  display: grid;
+  gap: 0.42rem;
+  margin: 0.9rem 0 0.15rem;
+}
+
+.wire span {
+  display: block;
+  height: 0.62rem;
+  background: color-mix(in srgb, var(--fg) 18%, var(--bg));
+  animation: wire 1.15s linear infinite;
+}
+
+.wire span:nth-child(1) {
+  width: 94%;
+}
+
+.wire span:nth-child(2) {
+  width: 76%;
+  animation-delay: 0.12s;
+}
+
+.wire span:nth-child(3) {
+  width: 58%;
+  animation-delay: 0.24s;
+}
+
+@keyframes wire {
+  0%,
+  100% {
+    opacity: 0.38;
+  }
+  50% {
+    opacity: 0.92;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wire span {
+    animation: none;
+    opacity: 0.55;
+  }
 }
 
 .result-kicker {

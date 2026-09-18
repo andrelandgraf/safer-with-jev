@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { askInterpretation, gateInterpretation, type AskResult, type InspectResult } from "@/lib/interpret";
 import type { InspectFailure } from "@/lib/inspect";
 
@@ -8,6 +9,28 @@ export type ResultState =
   | { kind: "pending" }
   | { kind: "ok"; result: AskResult | InspectResult; roundtripMs: number }
   | InspectFailure;
+
+function WirePending() {
+  const [ms, setMs] = useState(0);
+  useEffect(() => {
+    const started = performance.now();
+    const id = window.setInterval(() => {
+      setMs(Math.round(performance.now() - started));
+    }, 100);
+    return () => window.clearInterval(id);
+  }, []);
+  return (
+    <div className="result is-pending" role="status" aria-live="polite" aria-busy="true">
+      <p className="result-kicker">On the wire</p>
+      <p className="result-label">{(ms / 1000).toFixed(1)}s</p>
+      <div className="wire" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
+    </div>
+  );
+}
 
 function timings(roundtripMs: number, jevMs: number, image: boolean) {
   return (
@@ -30,16 +53,27 @@ export function JudgmentResult({
   state: ResultState;
   image?: boolean;
 }) {
+  const anchor = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (state.kind === "idle") {
+      return;
+    }
+    const node = anchor.current;
+    if (!node) {
+      return;
+    }
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    node.scrollIntoView({ block: "center", behavior: reduce ? "auto" : "smooth" });
+  }, [state.kind]);
   if (state.kind === "idle") {
     return null;
   }
+  return <div ref={anchor}>{resultBody(state, image)}</div>;
+}
+
+function resultBody(state: Exclude<ResultState, { kind: "idle" }>, image: boolean) {
   if (state.kind === "pending") {
-    return (
-      <div className="result" role="status" aria-live="polite">
-        <p className="result-kicker">Judging</p>
-        <p>Jev is reading this now.</p>
-      </div>
-    );
+    return <WirePending />;
   }
   if (state.kind === "error") {
     const wait =
