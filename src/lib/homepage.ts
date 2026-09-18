@@ -98,6 +98,12 @@ h2 {
   color: var(--accent);
   margin: 2.6rem 0 0.75rem;
 }
+h3 {
+  font-size: 1.12rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  margin: 1.75rem 0 0.45rem;
+}
 p { margin: 0.8rem 0; }
 a {
   color: inherit;
