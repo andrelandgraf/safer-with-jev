@@ -140,6 +140,26 @@ async function askImage(client: TypeSafeClient, state: unknown, signal: AbortSig
   }
 }
 
+async function askOpen(client: TypeSafeClient, question: string, text: string, signal: AbortSignal) {
+  try {
+    return await client.systemOne(
+      {
+        model: "jev-latest",
+        state: { text },
+        questions: {
+          answer: noul(question, {
+            true: "Yes. The condition in the question holds for `text`.",
+            false: "No. The condition in the question does not hold for `text`.",
+          }),
+        },
+      },
+      { timeout: STAGE_MS, signal, retry: { maxRetries: 0 } },
+    );
+  } catch (error) {
+    rethrowJev(error, signal);
+  }
+}
+
 async function askReply(client: TypeSafeClient, state: unknown, signal: AbortSignal) {
   try {
     return await client.systemOne(
@@ -191,4 +211,18 @@ export async function judge(input: {
   } catch {
     throw new HttpError(502, "jev_failed", "Jev returned an invalid judgment.", "jev");
   }
+}
+
+export async function askOpenNoul(input: {
+  client: TypeSafeClient;
+  question: string;
+  text: string;
+  signal: AbortSignal;
+}): Promise<number> {
+  const { answers } = await askOpen(input.client, input.question, input.text, input.signal);
+  const value = answers.answer.noul;
+  if (!Number.isFinite(value) || value < 0 || value > 1) {
+    throw new HttpError(502, "jev_failed", "Jev returned an invalid noul.", "jev");
+  }
+  return value;
 }

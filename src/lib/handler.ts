@@ -10,7 +10,7 @@ import {
 } from "./headers";
 import { HttpError } from "./http-error";
 import { inspectImage } from "./image";
-import { judge } from "./judge";
+import { askOpenNoul, judge } from "./judge";
 import { IMAGE_MAX_BYTES, TEXT_MAX_BYTES, TOTAL_MS } from "./limits";
 import type { Limiter } from "./limiter";
 import { retryAfterSeconds } from "./limiter";
@@ -75,6 +75,45 @@ export async function handleSaferRequest(request: Request, deps: SaferDeps): Pro
   try {
     const routing = parseRouting(request);
     includeVision = isImageRoute(routing);
+
+    if (routing.kind === "ask") {
+      await deps.limiter.admit({
+        ip: clientIp(request.headers),
+        image: false,
+        signal: total,
+      });
+      const jevStarted = Date.now();
+      let noulValue: number;
+      try {
+        noulValue = await askOpenNoul({
+          client: deps.typesafe,
+          question: routing.question,
+          text: routing.text,
+          signal: total,
+        });
+      } finally {
+        jevMs = Date.now() - jevStarted;
+      }
+      logEvent({
+        requestId,
+        stage: "jev",
+        action: null,
+        dispatch: false,
+        noul: noulValue,
+        timings: timings(),
+      });
+      return jsonResponse({
+        status: 200,
+        body: {
+          question: routing.question,
+          text: routing.text,
+          noul: noulValue,
+          type: "noul",
+        },
+        timings: timings(),
+        requestId,
+      });
+    }
 
     if (routing.kind === "model") {
       if (connectionWouldDropRequired(request.headers)) {

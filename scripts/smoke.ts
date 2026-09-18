@@ -71,6 +71,24 @@ if (!isRecord(demoJudgment) || typeof demoJudgment.allow !== "boolean" || demoJu
   throw new Error("nice-try returned an unexpected body");
 }
 
+const ask = await fetch(
+  `${baseUrl}/ask-jev?q=${encodeURIComponent("Is this good text?")}&t=${encodeURIComponent("The train arrives at noon.")}`,
+);
+if (ask.status !== 200) {
+  throw new Error(`ask-jev failed: ${ask.status} ${await ask.text()}`);
+}
+const askBody = await readJson(ask);
+if (
+  !isRecord(askBody) ||
+  askBody.type !== "noul" ||
+  typeof askBody.noul !== "number" ||
+  askBody.noul < 0 ||
+  askBody.noul > 1 ||
+  askBody.question !== "Is this good text?"
+) {
+  throw new Error("ask-jev returned an unexpected body");
+}
+
 const blockedForward = await fetch(
   `${baseUrl}/block-prompt-injections?target=${encodeURIComponent("https://example.com/v1/chat/completions")}`,
   {
@@ -89,6 +107,7 @@ console.log(
       ok: true,
       inspectAction: judgment.action,
       demoAction: demoJudgment.action,
+      askNoul: askBody.noul,
       jevMs: inspect.headers.get("x-neon-jev-ms"),
     },
     null,

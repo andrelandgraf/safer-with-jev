@@ -97,4 +97,38 @@ describe("parseRouting", () => {
     ).toThrow(/\?p=/);
     expect(() => parseRouting(request("/nice-try?p=hi"))).toThrow(/Use GET/);
   });
+
+  test("asks Jev from q and t", () => {
+    const routing = parseRouting(
+      new Request("https://safer.example/ask-jev?q=Is%20this%20good%20text%3F&t=Hello", { method: "GET" }),
+    );
+    expect(routing).toEqual({
+      kind: "ask",
+      question: "Is this good text?",
+      text: "Hello",
+    });
+  });
+
+  test("rejects GET /ask-jev without q and t", () => {
+    expect(() =>
+      parseRouting(new Request("https://safer.example/ask-jev?t=Hello", { method: "GET" })),
+    ).toThrow(/Supply q exactly once/);
+    expect(() =>
+      parseRouting(new Request("https://safer.example/ask-jev?q=Is%20this%20good%3F", { method: "GET" })),
+    ).toThrow(/Supply t exactly once/);
+    expect(() =>
+      parseRouting(new Request("https://safer.example/ask-jev?q=&t=Hello", { method: "GET" })),
+    ).toThrow(/q is empty/);
+  });
+
+  test("rejects GET /ask-jev with target or a body", () => {
+    expect(() =>
+      parseRouting(
+        new Request("https://safer.example/ask-jev?q=hi&t=there&target=https%3A%2F%2Fexample.com", {
+          method: "GET",
+        }),
+      ),
+    ).toThrow(/inspect-only/);
+    expect(() => parseRouting(request("/ask-jev?q=hi&t=there"))).toThrow(/Use GET/);
+  });
 });

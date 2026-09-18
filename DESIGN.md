@@ -12,6 +12,7 @@ Astra wrote the spec, reviewed it, then turned forwarding into a pass-then-forwa
 
 ```text
 GET  /                         HTML from SITE.md
+GET  /ask-jev?q=&t=            open yes/no Noul over text
 GET  /nice-try?p=<text>        prompt-injection inspect, query only
 POST /block-prompt-injections
 POST /block-unsafe-images
@@ -24,6 +25,8 @@ No Safer key. Inspect ignores `Authorization`, including dummy bearers. TypeSafe
 Omit `target` to inspect. Add it to forward only after `action=pass`. Review and block never forward. Every forward uses the caller's URL and credentials. There is no hosted model or PUT default: that would be an open paid proxy.
 
 GET `/nice-try` is inspect-only. The untrusted user turn is `p`. No body. No `target`.
+
+GET `/ask-jev` is inspect-only. `q` is a yes/no question. `t` is the text being judged. Response is `{ question, text, noul, type: "noul" }` — P(yes), not the Safer pass/review/block policy.
 
 ```text
 No target            → 200  judgment JSON
