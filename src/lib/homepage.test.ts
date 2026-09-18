@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import { homepageResponse, renderHomepage } from "./homepage";
+import { homepageResponse, renderHomepage, SITE_META } from "./homepage";
 import { markdownToHtml } from "./markdown";
 import { SITE_MARKDOWN } from "./site-markdown";
 
@@ -50,5 +50,15 @@ describe("homepage", () => {
     expect(html).toContain("/ask-jev?");
     expect(html).toContain("<!doctype html>");
     expect(renderHomepage(SITE_MARKDOWN)).toBe(html);
+  });
+
+  test("includes title, description, and social tags", async () => {
+    const html = await homepageResponse(SITE_MARKDOWN).text();
+    expect(html).toContain(`<title>${SITE_META.title}</title>`);
+    expect(html).toContain(`content="${SITE_META.description}"`);
+    expect(html).toContain('property="og:image" content="https://safer-with-jev.com/og.png"');
+    expect(html).toContain('name="twitter:card" content="summary_large_image"');
+    expect(html).toContain('rel="canonical" href="https://safer-with-jev.com/"');
+    expect(html).toContain("application/ld+json");
   });
 });

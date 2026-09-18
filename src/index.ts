@@ -9,6 +9,12 @@ import { createLimiter } from "./lib/limiter";
 import { STAGE_MS } from "./lib/limits";
 import { CORS_EXPOSE } from "./lib/response";
 import { SITE_MARKDOWN } from "./lib/site-markdown";
+import {
+  faviconResponse,
+  ogPngResponse,
+  robotsResponse,
+  sitemapResponse,
+} from "./lib/static-pages";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -55,6 +61,10 @@ app.use(
 );
 
 app.get("/", () => homepageResponse(SITE_MARKDOWN));
+app.get("/og.png", () => ogPngResponse());
+app.get("/favicon.svg", () => faviconResponse());
+app.get("/robots.txt", () => robotsResponse());
+app.get("/sitemap.xml", () => sitemapResponse());
 
 app.all("*", (c) =>
   handleSaferRequest(c.req.raw, {

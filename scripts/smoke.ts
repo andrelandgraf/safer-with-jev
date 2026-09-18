@@ -31,6 +31,18 @@ const homeHtml = await home.text();
 if (!homeHtml.includes("Safer with Jev") || !homeHtml.includes("block-prompt-injections")) {
   throw new Error("homepage HTML is missing expected copy");
 }
+if (!homeHtml.includes('property="og:image" content="https://safer-with-jev.com/og.png"')) {
+  throw new Error("homepage is missing the Open Graph image tag");
+}
+
+const og = await fetch(`${baseUrl}/og.png`);
+if (og.status !== 200 || !(og.headers.get("content-type") ?? "").includes("image/png")) {
+  throw new Error(`expected PNG on /og.png, got ${og.status} ${og.headers.get("content-type")}`);
+}
+const ogBytes = new Uint8Array(await og.arrayBuffer());
+if (ogBytes[0] !== 0x89 || ogBytes[1] !== 0x50) {
+  throw new Error("/og.png is not a PNG");
+}
 
 const missing = await fetch(`${baseUrl}/v1/chat/completions`, {
   method: "POST",
