@@ -51,6 +51,9 @@ describe("homepage", () => {
     const html = await response.text();
     expect(html).toContain('<main class="site">');
     expect(html).toContain("<h1>Safer with Jev</h1>");
+    expect(html).toContain("Vol. 1");
+    expect(html).toContain("<ul>");
+    expect(html).toContain("<li>");
     expect(html).toContain("block-prompt-injections");
     expect(html).toContain("/nice-try?p=");
     expect(html).toContain("/ask-jev?");

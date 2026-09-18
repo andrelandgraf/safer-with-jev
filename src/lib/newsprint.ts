@@ -62,7 +62,13 @@ export function renderNewsprintPage(page: NewsprintPage): string {
   --line: #9a958c;
 }
 * { box-sizing: border-box; }
-html, body { margin: 0; background: var(--bg); color: var(--fg); }
+html, body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image: radial-gradient(rgba(23, 22, 20, 0.045) 0.6px, transparent 0.6px);
+  background-size: 3px 3px;
+  color: var(--fg);
+}
 body {
   font-family: "Newsreader", "Iowan Old Style", Palatino, Georgia, serif;
   font-optical-sizing: auto;
@@ -71,18 +77,29 @@ body {
   font-weight: 400;
 }
 main {
-  max-width: 38rem;
+  max-width: 42rem;
   margin: 0 auto;
-  padding: 3rem 1.2rem 5.5rem;
+  padding: 2.4rem 1.25rem 5.5rem;
+}
+.folio {
+  margin: 0 0 0.55rem;
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 h1 {
-  font-size: clamp(2.35rem, 7vw, 3.35rem);
+  font-size: clamp(2.5rem, 8vw, 3.6rem);
   font-weight: 700;
-  letter-spacing: -0.028em;
-  line-height: 1.02;
-  margin: 0 0 1.15rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 2.5px solid var(--fg);
+  letter-spacing: -0.03em;
+  line-height: 0.98;
+  margin: 0 0 1.35rem;
+  padding: 0.55rem 0 0.7rem;
+  border-top: 3px solid var(--fg);
+  border-bottom: 3px double var(--fg);
+  text-align: center;
   text-wrap: balance;
 }
 h2 {
@@ -105,15 +122,17 @@ h3 {
   margin: 1.6rem 0 0.4rem;
 }
 p { margin: 0.72rem 0; }
-main.site > p:first-of-type::first-letter {
-  float: left;
-  font-size: 3.55rem;
-  font-weight: 700;
-  line-height: 0.78;
-  padding: 0.08em 0.1em 0 0;
+main.site > h1 + p {
+  font-size: 1.2rem;
+  line-height: 1.45;
 }
-main.share h2:first-child {
-  margin-top: 0;
+main.share h2:first-child { margin-top: 0; }
+main.share h1 {
+  text-align: left;
+  border-top: none;
+  border-bottom: 2.5px solid var(--fg);
+  padding: 0 0 0.75rem;
+  font-size: clamp(2.35rem, 7vw, 3.35rem);
 }
 a {
   color: inherit;
@@ -137,26 +156,43 @@ pre {
   margin: 1rem 0;
 }
 pre code { background: none; padding: 0; font-size: 0.78em; }
-ul { padding-left: 1.2rem; }
-main.site > ul:first-of-type {
+ul {
   list-style: none;
+  margin: 0.7rem 0 1.25rem;
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin: 0.85rem 0 1.1rem;
 }
-main.site > ul:first-of-type a {
-  display: inline-block;
-  padding: 0.28rem 0.7rem 0.32rem;
-  border: 1px solid var(--fg);
-  border-radius: 0;
-  text-decoration: none;
-  font-size: 0.95rem;
+li {
+  position: relative;
+  margin: 0;
+  padding: 0.38rem 0 0.38rem 1.15rem;
+  line-height: 1.4;
 }
-main.site > ul:first-of-type a:hover {
+li + li {
+  border-top: 1px solid color-mix(in srgb, var(--fg) 18%, transparent);
+}
+li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.72em;
+  width: 0.38em;
+  height: 0.38em;
   background: var(--fg);
-  color: var(--bg);
+}
+main.site h2:has(+ ul) { margin-bottom: 0; }
+main.site h2 + ul {
+  margin-top: 0;
+  padding: 0.15rem 0 0.2rem;
+  border-bottom: 1px solid var(--fg);
+}
+@media (min-width: 40rem) {
+  main.site h2 + ul {
+    columns: 2;
+    column-gap: 1.75rem;
+    column-rule: 1px solid color-mix(in srgb, var(--fg) 22%, transparent);
+  }
+  main.site h2 + ul li + li { border-top: none; }
+  main.site h2 + ul li { break-inside: avoid; }
 }
 main > p:last-child {
   margin-top: 2.8rem;
@@ -171,7 +207,7 @@ main > p:last-child {
 </head>
 <body>
 <main class="${page.mainClass}">
-${page.bodyHtml}
+${page.mainClass === "site" ? `<p class="folio">Vol. 1 · No. 1 · Mountain View, Calif.</p>\n` : ""}${page.bodyHtml}
 </main>
 </body>
 </html>

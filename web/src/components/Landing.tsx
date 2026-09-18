@@ -9,9 +9,11 @@ import { useInspectCall } from "./useInspectCall";
 function Inlines({
   inlines,
   onChip,
+  hed,
 }: {
   inlines: Inline[];
   onChip: (href: string) => void;
+  hed?: boolean;
 }) {
   return (
     <>
@@ -27,7 +29,12 @@ function Inlines({
         }
         if (chipTargetFromHref(inline.href)) {
           return (
-            <button key={index} type="button" className="chip" onClick={() => onChip(inline.href)}>
+            <button
+              key={index}
+              type="button"
+              className={hed ? "hed" : "chip"}
+              onClick={() => onChip(inline.href)}
+            >
               {inline.text}
             </button>
           );
@@ -75,11 +82,12 @@ export function Landing({ markdown }: { markdown: string }) {
 
   return (
     <main className="site">
+      <p className="folio">Vol. 1 · No. 1 · Mountain View, Calif.</p>
       {blocks.map((block, index) => {
         const kind = blockChipKind(block);
         return (
           <Fragment key={index}>
-            <MarkdownBlock block={block} onChip={onChip} />
+            <MarkdownBlock block={block} onChip={onChip} hed={Boolean(kind)} />
             {kind === "ask" ? (
               <>
                 <p className="demo-more">
@@ -129,7 +137,15 @@ export function Landing({ markdown }: { markdown: string }) {
   );
 }
 
-function MarkdownBlock({ block, onChip }: { block: Block; onChip: (href: string) => void }) {
+function MarkdownBlock({
+  block,
+  onChip,
+  hed,
+}: {
+  block: Block;
+  onChip: (href: string) => void;
+  hed?: boolean;
+}) {
   if (block.kind === "heading") {
     const Tag = (`h${block.level}` as "h1" | "h2" | "h3");
     return (
@@ -141,7 +157,7 @@ function MarkdownBlock({ block, onChip }: { block: Block; onChip: (href: string)
   if (block.kind === "paragraph") {
     return (
       <p>
-        <Inlines inlines={block.inlines} onChip={onChip} />
+        <Inlines inlines={block.inlines} onChip={onChip} hed={hed} />
       </p>
     );
   }
@@ -150,7 +166,7 @@ function MarkdownBlock({ block, onChip }: { block: Block; onChip: (href: string)
       <ul>
         {block.items.map((item, index) => (
           <li key={index}>
-            <Inlines inlines={item} onChip={onChip} />
+            <Inlines inlines={item} onChip={onChip} hed={hed} />
           </li>
         ))}
       </ul>
