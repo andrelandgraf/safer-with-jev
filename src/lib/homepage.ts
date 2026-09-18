@@ -42,8 +42,11 @@ export function renderHomepage(markdown: string): string {
 <meta name="description" content="${description}">
 <link rel="canonical" href="${SITE_ORIGIN}/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<meta name="theme-color" content="#0b0c0b">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#cfcbc4">
+<meta name="color-scheme" content="light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;0,6..72,700;1,6..72,400&display=swap" rel="stylesheet">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Safer with Jev">
 <meta property="og:locale" content="en_US">
@@ -62,97 +65,117 @@ export function renderHomepage(markdown: string): string {
 <script type="application/ld+json">${jsonLd}</script>
 <style>
 :root {
-  color-scheme: dark;
-  --bg: #0b0c0b;
-  --fg: #eceee9;
-  --muted: #9aa396;
-  --accent: #7cffb2;
-  --code: #141614;
-  --line: #2a2e2a;
+  color-scheme: light;
+  --bg: #cfcbc4;
+  --fg: #171614;
+  --muted: #5e5b55;
+  --accent: #1a5c3a;
+  --code: #e4e0d8;
+  --line: #9a958c;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--fg); }
 body {
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  font-size: 1.02rem;
-  line-height: 1.6;
-  letter-spacing: -0.011em;
+  font-family: "Newsreader", "Iowan Old Style", Palatino, Georgia, serif;
+  font-optical-sizing: auto;
+  font-size: 1.125rem;
+  line-height: 1.55;
+  font-weight: 400;
 }
 main {
-  max-width: 40rem;
+  max-width: 38rem;
   margin: 0 auto;
-  padding: 3.25rem 1.25rem 5rem;
+  padding: 3rem 1.2rem 5.5rem;
 }
 h1 {
-  font-size: clamp(2rem, 5vw, 2.6rem);
-  letter-spacing: -0.045em;
-  font-weight: 650;
-  line-height: 1.1;
-  margin: 0 0 0.85rem;
+  font-size: clamp(2.35rem, 7vw, 3.35rem);
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  line-height: 1.02;
+  margin: 0 0 1.15rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2.5px solid var(--fg);
+  text-wrap: balance;
 }
 h2 {
-  font-size: 0.84rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--accent);
-  margin: 2.6rem 0 0.75rem;
+  color: var(--fg);
+  margin: 2.4rem 0 0.9rem;
+  padding: 0.38rem 0;
+  border-top: 1px solid var(--fg);
+  border-bottom: 1px solid var(--fg);
 }
 h3 {
-  font-size: 1.12rem;
+  font-family: "Newsreader", "Iowan Old Style", Palatino, Georgia, serif;
+  font-size: 1.28rem;
   font-weight: 600;
-  letter-spacing: -0.025em;
-  margin: 1.75rem 0 0.45rem;
+  font-style: italic;
+  letter-spacing: -0.015em;
+  margin: 1.6rem 0 0.4rem;
 }
-p { margin: 0.8rem 0; }
+p { margin: 0.72rem 0; }
+main > p:first-of-type::first-letter {
+  float: left;
+  font-size: 3.55rem;
+  font-weight: 700;
+  line-height: 0.78;
+  padding: 0.08em 0.1em 0 0;
+}
 a {
   color: inherit;
-  text-decoration-color: color-mix(in srgb, var(--accent) 70%, transparent);
-  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, var(--fg) 45%, transparent);
+  text-underline-offset: 0.16em;
 }
 a:hover { color: var(--accent); }
 code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.88em;
+  font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.82em;
   background: var(--code);
-  padding: 0.12em 0.35em;
-  border-radius: 0.3rem;
+  padding: 0.08em 0.28em;
+  border-radius: 0.12rem;
 }
 pre {
   overflow-x: auto;
   background: var(--code);
   border: 1px solid var(--line);
-  border-radius: 0.7rem;
-  padding: 1rem 1.1rem;
+  border-radius: 0.12rem;
+  padding: 0.95rem 1rem;
   margin: 1rem 0;
 }
-pre code { background: none; padding: 0; font-size: 0.82em; }
-ul { padding-left: 1.15rem; }
+pre code { background: none; padding: 0; font-size: 0.78em; }
+ul { padding-left: 1.2rem; }
 main > ul:first-of-type {
   list-style: none;
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 1rem 0 1.2rem;
+  gap: 0.4rem;
+  margin: 0.85rem 0 1.1rem;
 }
 main > ul:first-of-type a {
   display: inline-block;
-  padding: 0.4rem 0.8rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
+  padding: 0.28rem 0.7rem 0.32rem;
+  border: 1px solid var(--fg);
+  border-radius: 0;
   text-decoration: none;
-  font-size: 0.92rem;
+  font-size: 0.95rem;
 }
 main > ul:first-of-type a:hover {
-  border-color: var(--accent);
+  background: var(--fg);
+  color: var(--bg);
 }
 main > p:last-child {
-  margin-top: 3.2rem;
+  margin-top: 2.8rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--fg);
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: 0.95rem;
+  font-style: italic;
 }
-::selection { background: color-mix(in srgb, var(--accent) 35%, transparent); }
+::selection { background: color-mix(in srgb, var(--accent) 28%, var(--bg)); }
 </style>
 </head>
 <body>

@@ -59,6 +59,8 @@ describe("homepage", () => {
     expect(html).toContain('property="og:image" content="https://safer-with-jev.com/og.png"');
     expect(html).toContain('name="twitter:card" content="summary_large_image"');
     expect(html).toContain('rel="canonical" href="https://safer-with-jev.com/"');
-    expect(html).toContain("application/ld+json");
+    expect(html).toContain('name="color-scheme" content="light"');
+    expect(html).toContain('content="#cfcbc4"');
+    expect(html).toContain("Newsreader");
   });
 });
