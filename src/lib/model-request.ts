@@ -243,6 +243,16 @@ export function parseModelRequest(bytes: Uint8Array): {
   );
 }
 
+export function plainPromptState(text: string): {
+  protocol: "plain";
+  turns: [{ role: "user"; provenance: "untrusted"; text: string }];
+} {
+  return {
+    protocol: "plain",
+    turns: [{ role: "user", provenance: "untrusted", text }],
+  };
+}
+
 export function parseInspectPrompt(bytes: Uint8Array, contentType: string): unknown {
   const type = contentType.split(";")[0]?.trim().toLowerCase() ?? "";
   if (type === "text/plain") {
@@ -250,10 +260,7 @@ export function parseInspectPrompt(bytes: Uint8Array, contentType: string): unkn
     if (!text) {
       throw new HttpError(400, "empty", "Prompt text is empty.", "validation");
     }
-    return {
-      protocol: "plain",
-      turns: [{ role: "user", provenance: "untrusted", text }],
-    };
+    return plainPromptState(text);
   }
   if (type === "application/json") {
     return parseModelRequest(bytes).state;

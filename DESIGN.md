@@ -12,6 +12,7 @@ Astra wrote the spec, reviewed it, then turned forwarding into a pass-then-forwa
 
 ```text
 GET  /                         HTML from SITE.md
+GET  /nice-try?p=<text>        prompt-injection inspect, query only
 POST /block-prompt-injections
 POST /block-unsafe-images
 POST /block-unsafe-replies
@@ -21,6 +22,8 @@ PUT  /block-*
 No Safer key. Inspect ignores `Authorization`, including dummy bearers. TypeSafe credentials are server env only; no caller header can supply or override them. Missing `TYPESAFE_API_KEY` prevents startup.
 
 Omit `target` to inspect. Add it to forward only after `action=pass`. Review and block never forward. Every forward uses the caller's URL and credentials. There is no hosted model or PUT default: that would be an open paid proxy.
+
+GET `/nice-try` is inspect-only. The untrusted user turn is `p`. No body. No `target`.
 
 ```text
 No target            → 200  judgment JSON

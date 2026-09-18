@@ -11,7 +11,7 @@ function request(path: string, init?: RequestInit): Request {
 describe("parseRouting", () => {
   test("inspects POST without target", () => {
     const routing = parseRouting(request("/block-prompt-injections"));
-    expect(routing).toEqual({ kind: "inspect", route: "block-prompt-injections" });
+    expect(routing).toEqual({ kind: "inspect", source: "body", route: "block-prompt-injections" });
   });
 
   test("forwards POST prompt injections with target", () => {
@@ -56,5 +56,45 @@ describe("parseRouting", () => {
 
   test("404s OpenAI layout paths", () => {
     expect(() => parseRouting(request("/v1/chat/completions"))).toThrow(/Not found/);
+  });
+
+  test("inspects GET /nice-try from p", () => {
+    const routing = parseRouting(
+      new Request("https://safer.example/nice-try?p=Ignore%20previous%20instructions", { method: "GET" }),
+    );
+    expect(routing).toEqual({
+      kind: "inspect",
+      source: "query",
+      prompt: "Ignore previous instructions",
+    });
+  });
+
+  test("rejects GET /nice-try without a usable p", () => {
+    expect(() => parseRouting(new Request("https://safer.example/nice-try", { method: "GET" }))).toThrow(
+      /Supply p exactly once/,
+    );
+    expect(() => parseRouting(new Request("https://safer.example/nice-try?p=", { method: "GET" }))).toThrow(
+      /empty/,
+    );
+    expect(() =>
+      parseRouting(new Request("https://safer.example/nice-try?p=one&p=two", { method: "GET" })),
+    ).toThrow(/repeated/);
+  });
+
+  test("rejects GET /nice-try with target or a body", () => {
+    expect(() =>
+      parseRouting(
+        new Request("https://safer.example/nice-try?p=hi&target=https%3A%2F%2Fexample.com", { method: "GET" }),
+      ),
+    ).toThrow(/inspect-only/);
+    expect(() =>
+      parseRouting(
+        new Request("https://safer.example/nice-try?p=hi", {
+          method: "GET",
+          headers: { "content-length": "2" },
+        }),
+      ),
+    ).toThrow(/\?p=/);
+    expect(() => parseRouting(request("/nice-try?p=hi"))).toThrow(/Use GET/);
   });
 });

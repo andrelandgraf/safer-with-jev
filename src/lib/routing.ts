@@ -1,4 +1,5 @@
 import { HttpError } from "./http-error";
+import { TEXT_MAX_BYTES } from "./limits";
 import { validateTargetUrl, type ValidatedTarget } from "./ssrf";
 
 export type RouteName =
@@ -9,7 +10,8 @@ export type RouteName =
 export type DestinationName = "chat-completions" | "responses" | "put";
 
 export type Routing =
-  | { kind: "inspect"; route: RouteName }
+  | { kind: "inspect"; source: "body"; route: RouteName }
+  | { kind: "inspect"; source: "query"; prompt: string }
   | {
       kind: "model";
       route: "block-prompt-injections";
@@ -61,6 +63,22 @@ export function parseRouting(request: Request): Routing {
     throw new HttpError(400, "invalid_destination", "target must not be repeated.", "validation");
   }
 
+  if (path === "/nice-try") {
+    if (request.method !== "GET") {
+      throw new HttpError(405, "method_not_allowed", "Use GET.", "validation");
+    }
+    if (targets.length > 0) {
+      throw new HttpError(
+        400,
+        "inspect_only",
+        "GET /nice-try is inspect-only. Do not send target.",
+        "validation",
+      );
+    }
+    assertNoBody(request);
+    return { kind: "inspect", source: "query", prompt: queryPrompt(url) };
+  }
+
   const route = routeName(path);
   if (!route) {
     throw new HttpError(404, "not_found", "Not found.", "validation");
@@ -71,7 +89,7 @@ export function parseRouting(request: Request): Routing {
   }
 
   if (targets.length === 0) {
-    return { kind: "inspect", route };
+    return { kind: "inspect", source: "body", route };
   }
 
   const raw = targets[0];
@@ -113,4 +131,58 @@ export function destinationName(routing: Routing, protocol?: DestinationName): D
     return protocol;
   }
   return undefined;
+}
+
+export function isImageRoute(routing: Routing): boolean {
+  if (routing.kind === "model") {
+    return false;
+  }
+  if (routing.kind === "inspect" && routing.source === "query") {
+    return false;
+  }
+  return routing.route === "block-unsafe-images";
+}
+
+export function isReplyRoute(routing: Routing): boolean {
+  if (routing.kind === "model") {
+    return false;
+  }
+  if (routing.kind === "inspect" && routing.source === "query") {
+    return false;
+  }
+  return routing.route === "block-unsafe-replies";
+}
+
+function assertNoBody(request: Request): void {
+  const length = request.headers.get("content-length");
+  if (length !== null && length !== "0") {
+    throw new HttpError(
+      400,
+      "unexpected_body",
+      "GET /nice-try takes the prompt in ?p=. Do not send a body.",
+      "validation",
+    );
+  }
+}
+
+function queryPrompt(url: URL): string {
+  const values = url.searchParams.getAll("p");
+  if (values.length === 0) {
+    throw new HttpError(400, "missing_prompt", "Supply p exactly once.", "validation");
+  }
+  if (values.length > 1) {
+    throw new HttpError(400, "invalid_prompt", "p must not be repeated.", "validation");
+  }
+  const raw = values[0];
+  if (raw === undefined) {
+    throw new HttpError(400, "missing_prompt", "Supply p exactly once.", "validation");
+  }
+  const text = raw.trim();
+  if (!text) {
+    throw new HttpError(400, "empty", "Prompt text is empty.", "validation");
+  }
+  if (new TextEncoder().encode(text).byteLength > TEXT_MAX_BYTES) {
+    throw new HttpError(400, "payload_too_large", "Prompt exceeds the text size limit.", "validation");
+  }
+  return text;
 }

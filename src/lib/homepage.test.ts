@@ -46,6 +46,7 @@ describe("homepage", () => {
     const html = await response.text();
     expect(html).toContain("<h1>Safer with Jev</h1>");
     expect(html).toContain("block-prompt-injections");
+    expect(html).toContain("/nice-try?p=");
     expect(html).toContain("<!doctype html>");
     expect(renderHomepage(SITE_MARKDOWN)).toBe(html);
   });

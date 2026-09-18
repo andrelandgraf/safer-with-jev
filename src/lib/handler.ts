@@ -14,9 +14,9 @@ import { judge } from "./judge";
 import { IMAGE_MAX_BYTES, TEXT_MAX_BYTES, TOTAL_MS } from "./limits";
 import type { Limiter } from "./limiter";
 import { retryAfterSeconds } from "./limiter";
-import { parseInspectPrompt, parseModelRequest, requireBearer } from "./model-request";
+import { parseInspectPrompt, parseModelRequest, plainPromptState, requireBearer } from "./model-request";
 import { pinnedFetch, resolvePublicAddresses } from "./pinned-fetch";
-import { destinationName, parseRouting } from "./routing";
+import { destinationName, isImageRoute, isReplyRoute, parseRouting } from "./routing";
 import { parseReplyBody } from "./replies";
 import {
   applyJudgmentHeaders,
@@ -74,7 +74,7 @@ export async function handleSaferRequest(request: Request, deps: SaferDeps): Pro
 
   try {
     const routing = parseRouting(request);
-    includeVision = routing.route === "block-unsafe-images";
+    includeVision = isImageRoute(routing);
 
     if (routing.kind === "model") {
       if (connectionWouldDropRequired(request.headers)) {
@@ -96,54 +96,55 @@ export async function handleSaferRequest(request: Request, deps: SaferDeps): Pro
 
     await deps.limiter.admit({
       ip: clientIp(request.headers),
-      image: routing.route === "block-unsafe-images",
+      image: isImageRoute(routing),
       signal: total,
     });
 
-    const maxBytes = routing.route === "block-unsafe-images" ? IMAGE_MAX_BYTES : TEXT_MAX_BYTES;
-    const body = await readBoundedBody(request, maxBytes, total);
-    const type = mediaType(request.headers);
-    const rawContentType = request.headers.get("content-type")?.trim() || type;
-
+    let body: Awaited<ReturnType<typeof readBoundedBody>> = new Uint8Array();
+    let type = "";
+    let rawContentType = "";
     let state: unknown;
     let protocol: "chat-completions" | "responses" | "put" | undefined = destinationName(routing);
-    if (routing.route === "block-unsafe-images") {
-      if (!type.startsWith("image/")) {
-        throw new HttpError(415, "unsupported_media_type", "Send a static JPEG, PNG, or WebP image.", "validation");
-      }
-      const image = inspectImage(body, type);
-      includeVision = true;
-      const visionStarted = Date.now();
-      try {
-        state = await captionImage({
-          bytes: body,
-          mime: image.mime,
-          baseUrl: deps.gatewayBaseUrl,
-          token: deps.gatewayToken,
-          signal: total,
-        });
-      } finally {
-        visionMs = Date.now() - visionStarted;
-      }
-    } else if (routing.route === "block-unsafe-replies") {
-      state = parseReplyBody(body, type);
-    } else if (routing.kind === "model") {
-      const parsed = parseModelRequest(body);
-      protocol = parsed.protocol;
-      state = parsed.state;
+    if (routing.kind === "inspect" && routing.source === "query") {
+      state = plainPromptState(routing.prompt);
     } else {
-      state = parseInspectPrompt(body, type);
-      if (routing.kind === "put") {
-        protocol = "put";
+      const maxBytes = isImageRoute(routing) ? IMAGE_MAX_BYTES : TEXT_MAX_BYTES;
+      body = await readBoundedBody(request, maxBytes, total);
+      type = mediaType(request.headers);
+      rawContentType = request.headers.get("content-type")?.trim() || type;
+      if (isImageRoute(routing)) {
+        if (!type.startsWith("image/")) {
+          throw new HttpError(415, "unsupported_media_type", "Send a static JPEG, PNG, or WebP image.", "validation");
+        }
+        const image = inspectImage(body, type);
+        includeVision = true;
+        const visionStarted = Date.now();
+        try {
+          state = await captionImage({
+            bytes: body,
+            mime: image.mime,
+            baseUrl: deps.gatewayBaseUrl,
+            token: deps.gatewayToken,
+            signal: total,
+          });
+        } finally {
+          visionMs = Date.now() - visionStarted;
+        }
+      } else if (isReplyRoute(routing)) {
+        state = parseReplyBody(body, type);
+      } else if (routing.kind === "model") {
+        const parsed = parseModelRequest(body);
+        protocol = parsed.protocol;
+        state = parsed.state;
+      } else {
+        state = parseInspectPrompt(body, type);
+        if (routing.kind === "put") {
+          protocol = "put";
+        }
       }
     }
 
-    const judgeKind =
-      routing.route === "block-unsafe-images"
-        ? "image"
-        : routing.route === "block-unsafe-replies"
-          ? "reply"
-          : "prompt";
+    const judgeKind = isImageRoute(routing) ? "image" : isReplyRoute(routing) ? "reply" : "prompt";
     const jevStarted = Date.now();
     let judgment;
     try {
