@@ -8,11 +8,13 @@ import { homepageResponse } from "./lib/homepage";
 import { createLimiter } from "./lib/limiter";
 import { STAGE_MS } from "./lib/limits";
 import { CORS_EXPOSE } from "./lib/response";
+import { sharePageForRequest } from "./lib/share-pages";
 import { SITE_MARKDOWN } from "./lib/site-markdown";
 import {
   faviconResponse,
   ogPngResponse,
   robotsResponse,
+  shareOgPngResponse,
   sitemapResponse,
 } from "./lib/static-pages";
 
@@ -62,17 +64,28 @@ app.use(
 
 app.get("/", () => homepageResponse(SITE_MARKDOWN));
 app.get("/og.png", () => ogPngResponse());
+app.get("/og/:file", (c) => {
+  const response = shareOgPngResponse(c.req.param("file"));
+  if (!response) {
+    return new Response("Not found.", { status: 404 });
+  }
+  return response;
+});
 app.get("/favicon.svg", () => faviconResponse());
 app.get("/robots.txt", () => robotsResponse());
 app.get("/sitemap.xml", () => sitemapResponse());
 
-app.all("*", (c) =>
-  handleSaferRequest(c.req.raw, {
+app.all("*", (c) => {
+  const share = sharePageForRequest(c.req.raw);
+  if (share) {
+    return share;
+  }
+  return handleSaferRequest(c.req.raw, {
     typesafe,
     limiter,
     gatewayBaseUrl,
     gatewayToken,
-  }),
-);
+  });
+});
 
 export default app;

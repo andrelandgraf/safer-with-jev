@@ -2,7 +2,7 @@
 
 A public HTTP gate. TypeSafe Jev inspects the body, then optionally forwards the same bytes to a caller-chosen HTTPS URL.
 
-No Safer API key. Server `TYPESAFE_API_KEY` only. Host: Neon Function `gateway`, custom domain `safer-with-jev.com`. GET `/` renders `SITE.md`. GET `/ask-jev?q=&t=` returns `{ noul, jevMs }`. GET `/nice-try?p=` returns `{ allow, action, jevMs }`.
+No Safer API key. Server `TYPESAFE_API_KEY` only. Host: Neon Function `gateway`, custom domain `safer-with-jev.com`. GET `/` renders `SITE.md`. GET `/ask-jev`, `/nice-try`, and `/block-*` without inspect params return a share page. GET `/ask-jev?q=&t=` returns `{ noul, jevMs }`. GET `/nice-try?p=` returns `{ allow, action, jevMs }`.
 
 ```bash
 export BASE_URL="https://safer-with-jev.com"

@@ -44,6 +44,7 @@ describe("homepage", () => {
     const response = homepageResponse(SITE_MARKDOWN);
     expect(response.headers.get("content-type")).toBe("text/html; charset=utf-8");
     const html = await response.text();
+    expect(html).toContain('<main class="site">');
     expect(html).toContain("<h1>Safer with Jev</h1>");
     expect(html).toContain("block-prompt-injections");
     expect(html).toContain("/nice-try?p=");

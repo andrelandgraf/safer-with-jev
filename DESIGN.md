@@ -12,8 +12,11 @@ Astra wrote the spec, reviewed it, then turned forwarding into a pass-then-forwa
 
 ```text
 GET  /                         HTML from SITE.md
+GET  /ask-jev                  share page (HTML + og)
 GET  /ask-jev?q=&t=            open yes/no Noul over text
+GET  /nice-try                 share page (HTML + og)
 GET  /nice-try?p=<text>        prompt-injection inspect, query only
+GET  /block-*                  share page (HTML + og)
 POST /block-prompt-injections
 POST /block-unsafe-images
 POST /block-unsafe-replies
@@ -24,9 +27,7 @@ No Safer key. Inspect ignores `Authorization`, including dummy bearers. TypeSafe
 
 Omit `target` to inspect. Add it to forward only after `action=pass`. Review and block never forward. Every forward uses the caller's URL and credentials. There is no hosted model or PUT default: that would be an open paid proxy.
 
-GET `/nice-try` is inspect-only. The untrusted user turn is `p`. No body. No `target`.
-
-GET `/ask-jev` is inspect-only. `q` is a yes/no question. `t` is the text being judged. Response is `{ noul, jevMs }` — P(yes) and the Jev call duration in milliseconds, not the Safer pass/review/block policy.
+GET `/nice-try` without `p`, GET `/ask-jev` without both `q` and `t`, and GET `/block-*` return a newsprint share page with Open Graph tags. Slackbot and other unfurl crawlers get that HTML even when inspect query params are present, so a shared demo URL still cards. JSON inspect is otherwise unchanged: `/nice-try` is inspect-only (`p`, no body, no `target`); `/ask-jev` is inspect-only (`q` yes/no, `t` the text). Ask JSON is `{ noul, jevMs }` — P(yes) and the Jev call duration in milliseconds, not the Safer pass/review/block policy.
 
 ```text
 No target            → 200  judgment JSON

@@ -35,6 +35,35 @@ if (!homeHtml.includes('property="og:image" content="https://safer-with-jev.com/
   throw new Error("homepage is missing the Open Graph image tag");
 }
 
+const sharePaths = [
+  "/ask-jev",
+  "/nice-try",
+  "/block-prompt-injections",
+  "/block-unsafe-images",
+  "/block-unsafe-replies",
+] as const;
+for (const path of sharePaths) {
+  const share = await fetch(`${baseUrl}${path}`);
+  if (share.status !== 200) {
+    throw new Error(`expected 200 on ${path}, got ${share.status}`);
+  }
+  const shareType = share.headers.get("content-type") ?? "";
+  if (!shareType.includes("text/html")) {
+    throw new Error(`expected HTML on ${path}, got ${shareType}`);
+  }
+  const shareHtml = await share.text();
+  if (
+    !shareHtml.includes(`rel="canonical" href="https://safer-with-jev.com${path}"`) ||
+    !shareHtml.includes(`content="https://safer-with-jev.com/og${path}.png"`)
+  ) {
+    throw new Error(`${path} is missing share tags`);
+  }
+  const card = await fetch(`${baseUrl}/og${path}.png`);
+  if (card.status !== 200 || !(card.headers.get("content-type") ?? "").includes("image/png")) {
+    throw new Error(`expected PNG on /og${path}.png, got ${card.status}`);
+  }
+}
+
 const og = await fetch(`${baseUrl}/og.png`);
 if (og.status !== 200 || !(og.headers.get("content-type") ?? "").includes("image/png")) {
   throw new Error(`expected PNG on /og.png, got ${og.status} ${og.headers.get("content-type")}`);
@@ -115,6 +144,22 @@ if (
   "question" in askBody
 ) {
   throw new Error("ask-jev returned an unexpected body");
+}
+
+const unfurl = await fetch(
+  `${baseUrl}/ask-jev?q=${encodeURIComponent("Is this good text?")}&t=${encodeURIComponent("The train arrives at noon.")}`,
+  { headers: { "user-agent": "Slackbot-LinkExpanding 1.0 (+https://api.slack.com/robots)" } },
+);
+if (unfurl.status !== 200) {
+  throw new Error(`expected 200 Slack unfurl on /ask-jev, got ${unfurl.status}`);
+}
+const unfurlType = unfurl.headers.get("content-type") ?? "";
+if (!unfurlType.includes("text/html")) {
+  throw new Error(`expected HTML for Slack unfurl on /ask-jev, got ${unfurlType}`);
+}
+const unfurlHtml = await unfurl.text();
+if (!unfurlHtml.includes('content="https://safer-with-jev.com/og/ask-jev.png"')) {
+  throw new Error("Slack unfurl HTML is missing the Ask Jev card");
 }
 
 const blockedForward = await fetch(
